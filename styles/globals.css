@@ -135,7 +135,6 @@
   height: 120px;
   position: relative;
   transform-style: preserve-3d;
-  animation: mask 4.8s infinite;
 }
 
 .loader .box {

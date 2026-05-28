@@ -8,10 +8,10 @@ export function LoaderScreen() {
   const [hidden, setHidden] = useState(false)
 
   useEffect(() => {
-    // Start fade after 2.2s (let the animation play through once)
-    const fadeTimer = setTimeout(() => setFading(true), 2200)
+    // Start fade after 3.8s (let the animation play through once fully)
+    const fadeTimer = setTimeout(() => setFading(true), 3800)
     // Unmount after fade completes
-    const hideTimer = setTimeout(() => setHidden(true), 2750)
+    const hideTimer = setTimeout(() => setHidden(true), 4400)
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(hideTimer)
