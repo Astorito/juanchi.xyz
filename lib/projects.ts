@@ -52,6 +52,15 @@ export const projects: Project[] = [
     description: "Digital Transformation for Businesses with AI.",
     image: "/digital-transformation-ai-business-technology.jpg",
     link: "https://astorlab.site/",
+    details: {
+      overview:
+        "Led strategic AI consulting engagements for SMEs and enterprises looking to integrate artificial intelligence into their core operations. Designed and delivered end-to-end digital transformation roadmaps, identifying high-impact automation opportunities and aligning technical solutions with business objectives.",
+      metrics: [
+        "Advised and implemented AI solutions across multiple industries including retail, logistics, and professional services.",
+        "Reduced manual operational workload by an average of 35% across client engagements through targeted process automation.",
+        "Delivered actionable AI adoption frameworks that shortened time-to-value for enterprise clients by 40%.",
+      ],
+    },
   },
   {
     title: "Alethia",
@@ -108,6 +117,15 @@ export const projects: Project[] = [
     description: "RAG Artificial Intelligence Agent for the logistics industry. Graduate Thesis Project.",
     image: "/ai-logistics-rag-agent-technology.jpg",
     link: null,
+    details: {
+      overview:
+        "Built a Retrieval-Augmented Generation (RAG) AI agent specifically designed for the logistics and supply chain industry as a graduate thesis project. The system enables natural language querying over complex operational data — shipment records, carrier contracts, and route histories — delivering instant, context-aware answers to operational teams without requiring technical expertise.",
+      metrics: [
+        "Achieved sub-2s average query response time over a corpus of thousands of logistics documents using optimized vector retrieval.",
+        "Reduced information retrieval time for operations teams by 70% compared to traditional manual document lookup.",
+        "Presented and approved as graduate thesis with honors — validated technical architecture by an academic evaluation committee.",
+      ],
+    },
   },
   {
     title: "Club de Corredores",
@@ -116,6 +134,15 @@ export const projects: Project[] = [
       "Planning and execution of sporting events with up to 20,000 runners. Buenos Aires Marathon, Adidas Race, and El Cruce Columbia.",
     image: "/marathon-running-sports-event-management.jpg",
     link: "https://elcruce.com.ar/",
+    details: {
+      overview:
+        "Served as Race Deputy Director for Club de Corredores, overseeing the full operational planning and on-ground execution of large-scale mass-participation sporting events across Argentina. Coordinated multidisciplinary teams covering logistics, safety, timing, and athlete experience for flagship events including the Buenos Aires Marathon, Adidas Race, and El Cruce Columbia.",
+      metrics: [
+        "Successfully managed events with up to 20,000 registered runners across multiple simultaneous race categories.",
+        "Coordinated 200+ volunteers and operational staff across a 42km urban course with zero critical incidents.",
+        "El Cruce Columbia: led operational planning for a 3-day, 100km trail relay across the Andes — one of South America's most demanding endurance events.",
+      ],
+    },
   },
   {
     title: "Patagonia Tech Week",
