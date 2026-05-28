@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, lazy } from 'react';
+
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
 interface InteractiveRobotSplineProps {
@@ -8,19 +9,33 @@ interface InteractiveRobotSplineProps {
   className?: string;
 }
 
+function hideSplineWatermark(splineApp: any) {
+  try {
+    const canvas = splineApp?.canvas as HTMLCanvasElement | undefined;
+    const container = canvas?.parentElement;
+    if (!container) return;
+    // Spline appends a <a> watermark link after the canvas
+    container.querySelectorAll('a').forEach((el: HTMLElement) => {
+      el.style.display = 'none';
+    });
+    // Also observe for late-injected elements
+    const observer = new MutationObserver(() => {
+      container.querySelectorAll('a').forEach((el: HTMLElement) => {
+        el.style.display = 'none';
+      });
+    });
+    observer.observe(container, { childList: true, subtree: true });
+  } catch (_) {}
+}
+
 export function InteractiveRobotSpline({ scene, className }: InteractiveRobotSplineProps) {
   return (
-    <Suspense
-      fallback={
-        <div className={`w-full h-full flex items-center justify-center bg-black text-white ${className}`}>
-          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l2-2.647z"></path>
-          </svg>
-        </div>
-      }
-    >
-      <Spline scene={scene} className={className} />
+    <Suspense fallback={<div className={`w-full h-full bg-black ${className}`} />}>
+      <Spline
+        scene={scene}
+        className={className}
+        onLoad={hideSplineWatermark}
+      />
     </Suspense>
   );
 }
