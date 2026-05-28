@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
-import { Projects } from "@/components/projects"
 import { About } from "@/components/about"
 import { Contact } from "@/components/contact"
 import { Footer } from "@/components/footer"
@@ -17,14 +15,10 @@ export default function Home() {
 
   return (
     <>
-      {/* Fixed background image */}
-      <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/hero-background.jpg')" }}
-      />
+      {/* Black background */}
+      <div className="fixed inset-0 z-0 bg-black" />
       
       <main className="relative z-10 min-h-screen">
-        <Header />
         <Hero />
         
         {/* Glass overlay for content below hero */}
@@ -33,13 +27,6 @@ export default function Home() {
           <div className="relative z-10">
             <div
               className={`transition-all duration-1000 ${
-                showRest ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-              }`}
-            >
-              <Projects />
-            </div>
-            <div
-              className={`transition-all duration-1000 delay-300 ${
                 showRest ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
               }`}
             >
