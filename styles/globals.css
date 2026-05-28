@@ -1,6 +1,13 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* Hide Spline watermark badge */
+a[href*="spline.design"],
+a[href*="spli.ne"] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

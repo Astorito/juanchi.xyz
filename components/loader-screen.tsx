@@ -8,10 +8,11 @@ export function LoaderScreen() {
   const [hidden, setHidden] = useState(false)
 
   useEffect(() => {
-    // Start fade after 3.8s (let the animation play through once fully)
-    const fadeTimer = setTimeout(() => setFading(true), 3800)
-    // Unmount after fade completes
-    const hideTimer = setTimeout(() => setHidden(true), 4400)
+    // Mask reveals assembled cube at ~3.2s (66% of 4.8s cycle).
+    // Fade starts at 4.8s (end of first cycle) so user sees the full reveal.
+    const fadeTimer = setTimeout(() => setFading(true), 4800)
+    // Unmount after fade transition completes
+    const hideTimer = setTimeout(() => setHidden(true), 5400)
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(hideTimer)
