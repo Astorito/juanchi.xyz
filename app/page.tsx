@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Hero } from "@/components/hero"
+import { LoaderScreen } from "@/components/loader-screen"
 import { About } from "@/components/about"
 import { Contact } from "@/components/contact"
 import { Footer } from "@/components/footer"
@@ -15,6 +16,8 @@ export default function Home() {
 
   return (
     <>
+      <LoaderScreen />
+
       {/* Black background */}
       <div className="fixed inset-0 z-0 bg-black" />
       

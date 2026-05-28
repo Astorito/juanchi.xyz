@@ -27,7 +27,7 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <button
-              onClick={() => scrollToSection("projects")}
+              onClick={() => scrollToSection("hero")}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Projects
@@ -57,7 +57,7 @@ export function Header() {
             <SheetContent>
               <nav className="flex flex-col gap-4 mt-8">
                 <button
-                  onClick={() => scrollToSection("projects")}
+                  onClick={() => scrollToSection("hero")}
                   className="text-left text-lg hover:text-accent transition-colors"
                 >
                   Projects

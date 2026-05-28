@@ -123,3 +123,178 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ===========================
+   Loader 3 — 3D Box Animation
+   white on black
+   =========================== */
+
+.loader {
+  --clr: #ffffff;
+  width: 132px;
+  height: 120px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: mask 4.8s infinite;
+}
+
+.loader .box {
+  width: 44px;
+  height: 44px;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.loader .box > div {
+  width: 44px;
+  height: 44px;
+  background-color: var(--clr);
+  position: absolute;
+}
+
+/* Resting positions + per-box launch offsets */
+.loader .box0 { top: 0;    left: 88px; --x:   0px; --y: -88px; }
+.loader .box1 { top: 25px; left: 44px; --x: -44px; --y: -44px; }
+.loader .box2 { top: 25px; left: 88px; --x:  44px; --y: -44px; }
+.loader .box3 { top: 50px; left:   0;  --x: -88px; --y:   0px; }
+.loader .box4 { top: 50px; left: 44px; --x:   0px; --y: -44px; }
+.loader .box5 { top: 50px; left: 88px; --x:  88px; --y:   0px; }
+.loader .box6 { top: 75px; left: 22px; --x: -44px; --y:  44px; }
+.loader .box7 { top: 75px; left: 66px; --x:  44px; --y:  44px; }
+
+.loader .box0 > div { animation: box-move0 4.8s infinite, box-scale0 4.8s infinite; }
+.loader .box1 > div { animation: box-move1 4.8s infinite, box-scale1 4.8s infinite; }
+.loader .box2 > div { animation: box-move2 4.8s infinite, box-scale2 4.8s infinite; }
+.loader .box3 > div { animation: box-move3 4.8s infinite, box-scale3 4.8s infinite; }
+.loader .box4 > div { animation: box-move4 4.8s infinite, box-scale4 4.8s infinite; }
+.loader .box5 > div { animation: box-move5 4.8s infinite, box-scale5 4.8s infinite; }
+.loader .box6 > div { animation: box-move6 4.8s infinite, box-scale6 4.8s infinite; }
+.loader .box7 > div { animation: box-move7 4.8s infinite, box-scale7 4.8s infinite; }
+
+.loader .ground {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.loader .ground > div {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--clr) 0%, transparent 65%);
+  opacity: 0;
+  animation: ground 4.8s infinite;
+}
+
+.loader .ground > div::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--clr) 0%, transparent 50%);
+  opacity: 0;
+  animation: ground-shine 4.8s infinite;
+}
+
+@keyframes box-move0 {
+  12% { transform: translate(var(--x), var(--y)); }
+  25%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale0 {
+  6%  { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  14%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move1 {
+  16% { transform: translate(var(--x), var(--y)); }
+  29%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale1 {
+  10% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  18%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move2 {
+  20% { transform: translate(var(--x), var(--y)); }
+  33%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale2 {
+  14% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  22%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move3 {
+  24% { transform: translate(var(--x), var(--y)); }
+  37%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale3 {
+  18% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  26%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move4 {
+  28% { transform: translate(var(--x), var(--y)); }
+  41%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale4 {
+  22% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  30%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move5 {
+  32% { transform: translate(var(--x), var(--y)); }
+  45%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale5 {
+  26% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  34%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move6 {
+  36% { transform: translate(var(--x), var(--y)); }
+  49%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale6 {
+  30% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  38%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes box-move7 {
+  40% { transform: translate(var(--x), var(--y)); }
+  53%, 52% { transform: translate(0, 0); }
+  80% { transform: translate(0, -32px); }
+  90%, 100% { transform: translate(0, 188px); }
+}
+@keyframes box-scale7 {
+  34% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0); }
+  42%, 100% { transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(1); }
+}
+
+@keyframes ground {
+  0%, 65%  { transform: rotateX(90deg) rotateY(0deg) translate(-48px, -120px) translateZ(100px) scale(0); }
+  75%, 90% { transform: rotateX(90deg) rotateY(0deg) translate(-48px, -120px) translateZ(100px) scale(1); }
+  100%     { transform: rotateX(90deg) rotateY(0deg) translate(-48px, -120px) translateZ(100px) scale(0); }
+}
+
+@keyframes ground-shine {
+  0%, 70%  { opacity: 0; }
+  75%, 87% { opacity: 0.2; }
+  100%     { opacity: 0; }
+}
+
+@keyframes mask {
+  0%, 65%  { opacity: 0; }
+  66%, 100% { opacity: 1; }
+}
