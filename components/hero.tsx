@@ -12,15 +12,15 @@ const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splin
 
 // 9 positions — cards moved 5% outward; Astorito (index 6) on right side; PTW (index 8) top-right
 const positions = [
-  { className: "top-[4%] left-[8%]",            depth: 0.5, size: "w-36 h-36 md:w-48 md:h-48"  },
-  { className: "top-[3%] left-[32%]",            depth: 1,   size: "w-44 h-44 md:w-52 md:h-52"  },
-  { className: "top-[8%] left-[48%]",            depth: 1,   size: "w-32 h-32 md:w-40 md:h-40"  },
-  { className: "top-[38%] left-[6%]",            depth: 1,   size: "w-36 h-36 md:w-48 md:h-48"  },
-  { className: "top-[20%] right-[8%]",           depth: 2,   size: "w-36 h-48 md:w-48 md:h-56"  },
-  { className: "top-[68%] left-[13%]",           depth: 4,   size: "w-40 h-40 md:w-56 md:h-56"  },
-  { className: "top-[55%] right-[4%]",           depth: 1,   size: "w-32 h-32 md:w-40 md:h-40"  },
-  { className: "top-[65%] right-[11%]",          depth: 2,   size: "w-36 h-48 md:w-48 md:h-56"  },
-  { className: "top-[3%] right-[6%]",            depth: 1,   size: "w-28 h-28 md:w-36 md:h-36"  },
+  { className: "top-[4%] left-[8%]",            depth: 0.5, size: "w-32 h-32 md:w-40 md:h-40"  },
+  { className: "top-[3%] left-[32%]",            depth: 1,   size: "w-36 h-36 md:w-44 md:h-44"  },
+  { className: "top-[8%] left-[48%]",            depth: 1,   size: "w-28 h-28 md:w-36 md:h-36"  },
+  { className: "top-[38%] left-[6%]",            depth: 1,   size: "w-32 h-32 md:w-40 md:h-40"  },
+  { className: "top-[20%] right-[8%]",           depth: 2,   size: "w-32 h-40 md:w-40 md:h-48"  },
+  { className: "top-[68%] left-[13%]",           depth: 4,   size: "w-36 h-36 md:w-48 md:h-48"  },
+  { className: "top-[55%] right-[4%]",           depth: 1,   size: "w-28 h-28 md:w-36 md:h-36"  },
+  { className: "top-[65%] right-[11%]",          depth: 2,   size: "w-32 h-40 md:w-40 md:h-48"  },
+  { className: "top-[3%] right-[6%]",            depth: 1,   size: "w-24 h-24 md:w-32 md:h-32"  },
 ]
 
 export function Hero() {
