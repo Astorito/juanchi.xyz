@@ -161,14 +161,24 @@
 .loader .box6 { top: 75px; left: 22px; --x: -44px; --y:  44px; }
 .loader .box7 { top: 75px; left: 66px; --x:  44px; --y:  44px; }
 
-.loader .box0 > div { animation: box-move0 4.8s infinite, box-scale0 4.8s infinite; }
-.loader .box1 > div { animation: box-move1 4.8s infinite, box-scale1 4.8s infinite; }
-.loader .box2 > div { animation: box-move2 4.8s infinite, box-scale2 4.8s infinite; }
-.loader .box3 > div { animation: box-move3 4.8s infinite, box-scale3 4.8s infinite; }
-.loader .box4 > div { animation: box-move4 4.8s infinite, box-scale4 4.8s infinite; }
-.loader .box5 > div { animation: box-move5 4.8s infinite, box-scale5 4.8s infinite; }
-.loader .box6 > div { animation: box-move6 4.8s infinite, box-scale6 4.8s infinite; }
-.loader .box7 > div { animation: box-move7 4.8s infinite, box-scale7 4.8s infinite; }
+/* move on the .box parent, scale+rotate on the inner div — keeps transforms composable */
+.loader .box0 { animation: box-move0 4.8s infinite; }
+.loader .box1 { animation: box-move1 4.8s infinite; }
+.loader .box2 { animation: box-move2 4.8s infinite; }
+.loader .box3 { animation: box-move3 4.8s infinite; }
+.loader .box4 { animation: box-move4 4.8s infinite; }
+.loader .box5 { animation: box-move5 4.8s infinite; }
+.loader .box6 { animation: box-move6 4.8s infinite; }
+.loader .box7 { animation: box-move7 4.8s infinite; }
+
+.loader .box0 > div { animation: box-scale0 4.8s infinite; }
+.loader .box1 > div { animation: box-scale1 4.8s infinite; }
+.loader .box2 > div { animation: box-scale2 4.8s infinite; }
+.loader .box3 > div { animation: box-scale3 4.8s infinite; }
+.loader .box4 > div { animation: box-scale4 4.8s infinite; }
+.loader .box5 > div { animation: box-scale5 4.8s infinite; }
+.loader .box6 > div { animation: box-scale6 4.8s infinite; }
+.loader .box7 > div { animation: box-scale7 4.8s infinite; }
 
 .loader .ground {
   position: absolute;
