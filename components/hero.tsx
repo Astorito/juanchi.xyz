@@ -15,11 +15,11 @@ const positions = [
   { className: "top-[3%] left-[32%]",          depth: 1,   size: "w-36 h-36 md:w-44 md:h-44" },
   { className: "top-[8%] left-[48%]",          depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
   { className: "top-[38%] left-[6%]",          depth: 1,   size: "w-32 h-32 md:w-40 md:h-40" },
-  { className: "top-[20%] right-[8%]",         depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
+  { className: "top-[20%] right-[3%]",         depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
   { className: "top-[68%] left-[13%]",         depth: 4,   size: "w-36 h-36 md:w-48 md:h-48" },
   { className: "top-[55%] right-[4%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
   { className: "top-[65%] right-[11%]",        depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
-  { className: "top-[3%] right-[6%]",          depth: 1,   size: "w-24 h-24 md:w-32 md:h-32" },
+  { className: "top-[3%] left-[62%]",          depth: 1,   size: "w-24 h-24 md:w-32 md:h-32" },
 ]
 
 const ease = [0.16, 1, 0.3, 1] as const
