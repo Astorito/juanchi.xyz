@@ -9,9 +9,13 @@ import { Footer } from "@/components/footer"
 
 export default function Home() {
   const [showRest, setShowRest] = useState(false)
+  const [heroReady, setHeroReady] = useState(false)
 
   useEffect(() => {
-    setTimeout(() => setShowRest(true), 3500)
+    // loader hides at ~3800ms; hero sequence starts just after
+    const heroTimer = setTimeout(() => setHeroReady(true), 4000)
+    const restTimer = setTimeout(() => setShowRest(true), 5200)
+    return () => { clearTimeout(heroTimer); clearTimeout(restTimer) }
   }, [])
 
   return (
@@ -20,9 +24,9 @@ export default function Home() {
 
       {/* Black background */}
       <div className="fixed inset-0 z-0 bg-black" />
-      
+
       <main className="relative z-10 min-h-screen">
-        <Hero />
+        <Hero ready={heroReady} />
         
         {/* Glass overlay for content below hero */}
         <div className="relative">

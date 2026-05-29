@@ -10,30 +10,49 @@ import { projects, type Project } from "@/lib/projects"
 
 const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode"
 
-// 9 positions — cards moved 5% outward; Astorito (index 6) on right side; PTW (index 8) top-right
 const positions = [
-  { className: "top-[4%] left-[8%]",            depth: 0.5, size: "w-32 h-32 md:w-40 md:h-40"  },
-  { className: "top-[3%] left-[32%]",            depth: 1,   size: "w-36 h-36 md:w-44 md:h-44"  },
-  { className: "top-[8%] left-[48%]",            depth: 1,   size: "w-28 h-28 md:w-36 md:h-36"  },
-  { className: "top-[38%] left-[6%]",            depth: 1,   size: "w-32 h-32 md:w-40 md:h-40"  },
-  { className: "top-[20%] right-[8%]",           depth: 2,   size: "w-32 h-40 md:w-40 md:h-48"  },
-  { className: "top-[68%] left-[13%]",           depth: 4,   size: "w-36 h-36 md:w-48 md:h-48"  },
-  { className: "top-[55%] right-[4%]",           depth: 1,   size: "w-28 h-28 md:w-36 md:h-36"  },
-  { className: "top-[65%] right-[11%]",          depth: 2,   size: "w-32 h-40 md:w-40 md:h-48"  },
-  { className: "top-[3%] right-[6%]",            depth: 1,   size: "w-24 h-24 md:w-32 md:h-32"  },
+  { className: "top-[4%] left-[8%]",         depth: 0.5, size: "w-32 h-32 md:w-40 md:h-40" },
+  { className: "top-[3%] left-[32%]",          depth: 1,   size: "w-36 h-36 md:w-44 md:h-44" },
+  { className: "top-[8%] left-[48%]",          depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
+  { className: "top-[38%] left-[6%]",          depth: 1,   size: "w-32 h-32 md:w-40 md:h-40" },
+  { className: "top-[20%] right-[8%]",         depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
+  { className: "top-[68%] left-[13%]",         depth: 4,   size: "w-36 h-36 md:w-48 md:h-48" },
+  { className: "top-[55%] right-[4%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
+  { className: "top-[65%] right-[11%]",        depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
+  { className: "top-[3%] right-[6%]",          depth: 1,   size: "w-24 h-24 md:w-32 md:h-32" },
 ]
 
-export function Hero() {
+const ease = [0.16, 1, 0.3, 1] as const
+
+interface HeroProps {
+  ready?: boolean
+}
+
+export function Hero({ ready = false }: HeroProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [scope, animate] = useAnimate()
+  const [robotVisible, setRobotVisible] = useState(false)
 
   useEffect(() => {
-    animate(
-      ".floating-card",
-      { opacity: [0, 1] },
-      { duration: 0.5, delay: stagger(0.15) }
-    )
-  }, [animate])
+    if (!ready) return
+
+    // Phase 3: robot appears 600ms after ready
+    const robotTimer = setTimeout(() => setRobotVisible(true), 600)
+
+    // Phase 4: cards appear 1000ms after ready, staggered
+    const cardsTimer = setTimeout(() => {
+      animate(
+        ".floating-card",
+        { opacity: [0, 1] },
+        { duration: 0.5, delay: stagger(0.12) }
+      )
+    }, 1000)
+
+    return () => {
+      clearTimeout(robotTimer)
+      clearTimeout(cardsTimer)
+    }
+  }, [ready, animate])
 
   const handleCardClick = (project: Project) => {
     if (project.details) {
@@ -50,17 +69,22 @@ export function Hero() {
         ref={scope}
         className="min-h-screen flex items-center justify-center px-6 lg:px-8 pt-20 pb-4 relative overflow-hidden bg-black"
       >
-        {/* Robot — pushed to bottom via translateY, scaled down */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Robot — phase 3, fades in after H1+H2 */}
+        <motion.div
+          className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: robotVisible ? 1 : 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
           <div
             className="w-full h-full"
             style={{ transform: "translateY(20%) scale(0.65)", transformOrigin: "center center" }}
           >
             <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="w-full h-full" />
           </div>
-        </div>
+        </motion.div>
 
-        {/* Floating project cards — z-10, below text */}
+        {/* Floating project cards — z-10, phase 4 */}
         <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none">
           {projects.map((project, i) => {
             const pos = positions[i] ?? positions[0]
@@ -92,18 +116,27 @@ export function Hero() {
           })}
         </Floating>
 
-        {/* Text — z-50, centered, pushed up */}
+        {/* Text — z-50, sequential: H1 phase 1, H2 phase 2 */}
         <div className="max-w-5xl w-full mx-auto text-center space-y-4 relative z-50 -mt-48">
-          <h1 className="text-5xl lg:text-8xl font-heading tracking-tight md:text-6xl text-white">
+          <motion.h1
+            className="text-5xl lg:text-8xl font-heading tracking-tight md:text-6xl text-white"
+            initial={{ opacity: 0, y: 28 }}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+            transition={{ duration: 0.7, ease }}
+          >
             Juanchi Martinez
-          </h1>
-          <p className="text-base lg:text-lg text-muted-foreground max-w-2xl leading-relaxed text-center mx-auto">
+          </motion.h1>
+          <motion.p
+            className="text-base lg:text-lg text-muted-foreground max-w-2xl leading-relaxed text-center mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.7, ease, delay: 0.25 }}
+          >
             I build technology, strategy and chaos into something valuable
-          </p>
+          </motion.p>
         </div>
       </section>
 
-      {/* Modal — rendered outside section to avoid overflow:hidden clipping */}
       <ProjectModal
         project={selectedProject}
         onClose={() => setSelectedProject(null)}

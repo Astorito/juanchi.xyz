@@ -34,7 +34,7 @@ export const projects: Project[] = [
     title: "Mosaico Studio",
     role: "Co-Founder",
     description: "AI-powered image and video generation platform for enterprises.",
-    image: "/ai-image-video-generation-platform-technology.jpg",
+    image: "/mosaico-studio-logo.png",
     link: "https://www.mosaico-studio.com/",
     details: {
       overview:
@@ -67,7 +67,7 @@ export const projects: Project[] = [
     role: "Director Argentina",
     description:
       "Civic transparency platform providing AI-powered access to detailed analysis of legislative sessions from over 50 municipalities.",
-    image: "/ai-civic-transparency-legislative-platform.jpg",
+    image: "/alethia-logo.jpg",
     link: "https://alethia-azure.vercel.app/",
     details: {
       overview:
@@ -84,7 +84,7 @@ export const projects: Project[] = [
     role: "Business Analyst",
     description:
       "AI implementation leader bridging business and technical teams to identify problems and propose data-driven solutions.",
-    image: "/business-analysis-ai-implementation-corporate.jpg",
+    image: "/grant-solutions-logo.png",
     link: "https://grantsolutions.es/",
     details: {
       overview:
@@ -132,7 +132,7 @@ export const projects: Project[] = [
     role: "Race Deputy Director",
     description:
       "Planning and execution of sporting events with up to 20,000 runners. Buenos Aires Marathon, Adidas Race, and El Cruce Columbia.",
-    image: "/marathon-running-sports-event-management.jpg",
+    image: "/el-cruce-aerial.jpg",
     link: "https://elcruce.com.ar/",
     details: {
       overview:
@@ -148,7 +148,7 @@ export const projects: Project[] = [
     title: "Patagonia Tech Week",
     role: "Director",
     description: "Premium tech immersion event in San Martín de los Andes bringing together founders, VCs, and builders.",
-    image: "/modern-tech-office-workspace.jpg",
+    image: "/patagonia-tech-week.jpg",
     link: null,
     comingSoon: true,
     details: {
