@@ -23,7 +23,7 @@ const LOADER_CSS = `
     bottom: -11px;
     background: #000000;
     transform: translateZ(200px) rotate(var(--r));
-    animation: ldr-mask var(--duration) linear forwards infinite;
+    animation: ldr-mask var(--duration) linear forwards 1;
   }
   .ldr:after {
     --r: -20.5deg;
@@ -46,7 +46,7 @@ const LOADER_CSS = `
     background: var(--primary);
     background: linear-gradient(45deg, var(--primary) 0%, var(--primary) 50%, var(--primary-light) 50%, var(--primary-light) 100%);
     transform-style: preserve-3d;
-    animation: ldr-ground var(--duration) linear forwards infinite;
+    animation: ldr-ground var(--duration) linear forwards 1;
   }
   .ldr .ground div:before, .ldr .ground div:after {
     --rx: 90deg; --ry: 0deg; --x: 44px; --y: 162px; --z: -50px;
@@ -57,7 +57,7 @@ const LOADER_CSS = `
     background: linear-gradient(var(--primary), var(--primary-rgba));
     position: absolute;
     transform: rotateX(var(--rx)) rotateY(var(--ry)) translate(var(--x), var(--y)) translateZ(var(--z));
-    animation: ldr-ground-shine var(--duration) linear forwards infinite;
+    animation: ldr-ground-shine var(--duration) linear forwards 1;
   }
   .ldr .ground div:after {
     --rx: 90deg; --ry: 90deg; --x: 0; --y: 177px; --z: 150px;
@@ -67,7 +67,7 @@ const LOADER_CSS = `
   .ldr .box {
     --x: 0; --y: 0;
     position: absolute;
-    animation: var(--duration) linear forwards infinite;
+    animation: var(--duration) linear forwards 1;
     transform: translate(var(--x), var(--y));
   }
   .ldr .box div {
@@ -76,7 +76,7 @@ const LOADER_CSS = `
     height: 48px;
     position: relative;
     transform-style: preserve-3d;
-    animation: var(--duration) ease forwards infinite;
+    animation: var(--duration) ease forwards 1;
     transform: rotateY(-47deg) rotateX(-15deg) rotateZ(15deg) scale(0);
   }
   .ldr .box div:before, .ldr .box div:after {
