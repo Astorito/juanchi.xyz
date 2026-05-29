@@ -84,8 +84,8 @@ export function Hero({ ready = false }: HeroProps) {
           </div>
         </motion.div>
 
-        {/* Floating project cards — z-10, phase 4 */}
-        <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none">
+        {/* Floating project cards — z-10, phase 4, hidden on mobile */}
+        <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none hidden md:block">
           {projects.map((project, i) => {
             const pos = positions[i] ?? positions[0]
             const hasAction = !!(project.details || project.link)
@@ -117,9 +117,9 @@ export function Hero({ ready = false }: HeroProps) {
         </Floating>
 
         {/* Text — z-50, sequential: H1 phase 1, H2 phase 2 */}
-        <div className="max-w-5xl w-full mx-auto text-center space-y-4 relative z-50 -mt-48">
+        <div className="max-w-5xl w-full mx-auto text-center space-y-4 relative z-50 -mt-8 md:-mt-48">
           <motion.h1
-            className="text-5xl lg:text-8xl font-heading tracking-tight md:text-6xl text-white"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-heading tracking-tight text-white"
             initial={{ opacity: 0, y: 28 }}
             animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
             transition={{ duration: 0.7, ease }}

@@ -42,7 +42,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="pointer-events-auto w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="pointer-events-auto w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
 
               {/* Image header */}
               <div className="relative h-44 overflow-hidden">
@@ -74,7 +74,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
               {/* Content — two columns */}
               <div className="px-5 pt-4 pb-5">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Left: Overview */}
                   <div className="flex flex-col gap-3">
                     <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">

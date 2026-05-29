@@ -84,7 +84,7 @@ export const projects: Project[] = [
     role: "Business Analyst",
     description:
       "AI implementation leader bridging business and technical teams to identify problems and propose data-driven solutions.",
-    image: "/grant-solutions-logo.png",
+    image: "/grant-solutions-office.png",
     link: "https://grantsolutions.es/",
     details: {
       overview:
