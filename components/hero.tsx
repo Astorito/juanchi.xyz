@@ -12,14 +12,14 @@ const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splin
 
 const positions = [
   { className: "top-[4%] left-[8%]",         depth: 0.5, size: "w-32 h-32 md:w-40 md:h-40" },
-  { className: "top-[3%] left-[32%]",          depth: 1,   size: "w-36 h-36 md:w-44 md:h-44" },
-  { className: "top-[8%] left-[48%]",          depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
-  { className: "top-[38%] left-[6%]",          depth: 1,   size: "w-32 h-32 md:w-40 md:h-40" },
-  { className: "top-[20%] right-[3%]",         depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
-  { className: "top-[68%] left-[13%]",         depth: 4,   size: "w-36 h-36 md:w-48 md:h-48" },
-  { className: "top-[55%] right-[4%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
-  { className: "top-[65%] right-[11%]",        depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
-  { className: "top-[3%] left-[62%]",          depth: 1,   size: "w-24 h-24 md:w-32 md:h-32" },
+  { className: "top-[3%] left-[32%]",         depth: 1,   size: "w-36 h-36 md:w-44 md:h-44" },
+  { className: "top-[8%] left-[48%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
+  { className: "top-[38%] left-[6%]",         depth: 1,   size: "w-32 h-32 md:w-40 md:h-40" },
+  { className: "top-[20%] right-[3%]",        depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
+  { className: "top-[68%] left-[13%]",        depth: 4,   size: "w-36 h-36 md:w-48 md:h-48" },
+  { className: "top-[55%] right-[4%]",        depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
+  { className: "top-[65%] right-[11%]",       depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
+  { className: "top-[3%] left-[62%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
 ]
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -67,7 +67,7 @@ export function Hero({ ready = false }: HeroProps) {
       <section
         id="hero"
         ref={scope}
-        className="min-h-screen flex items-center justify-center px-6 lg:px-8 pt-20 pb-4 relative overflow-hidden bg-black"
+        className="min-h-screen flex items-center justify-center px-6 lg:px-8 pt-20 pb-8 relative md:overflow-hidden bg-black"
       >
         {/* Robot — phase 3, fades in after H1+H2 */}
         <motion.div
@@ -84,7 +84,7 @@ export function Hero({ ready = false }: HeroProps) {
           </div>
         </motion.div>
 
-        {/* Floating project cards — z-10, phase 4, hidden on mobile */}
+        {/* Floating project cards — z-10, phase 4, desktop only */}
         <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none hidden md:block">
           {projects.map((project, i) => {
             const pos = positions[i] ?? positions[0]
@@ -100,6 +100,7 @@ export function Hero({ ready = false }: HeroProps) {
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url('${project.image}')` }}
                   />
+                  <div className="absolute inset-0 bg-black/10" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
                   <div className="relative h-full p-2 md:p-3 flex flex-col justify-end">
                     <p className="text-[9px] md:text-[10px] font-medium text-white/70 uppercase tracking-wider leading-tight">
@@ -116,8 +117,8 @@ export function Hero({ ready = false }: HeroProps) {
           })}
         </Floating>
 
-        {/* Text — z-50, sequential: H1 phase 1, H2 phase 2 */}
-        <div className="max-w-5xl w-full mx-auto text-center space-y-4 relative z-50 -mt-8 md:-mt-48">
+        {/* Text + mobile cards — z-50 */}
+        <div className="max-w-5xl w-full mx-auto text-center relative z-50 -mt-8 md:-mt-48 flex flex-col items-center gap-4">
           <motion.h1
             className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-heading tracking-tight text-white"
             initial={{ opacity: 0, y: 28 }}
@@ -134,6 +135,43 @@ export function Hero({ ready = false }: HeroProps) {
           >
             I build technology, strategy and chaos into something valuable
           </motion.p>
+
+          {/* Mobile project cards strip — visible only below md */}
+          <motion.div
+            className="md:hidden w-full mt-4"
+            initial={{ opacity: 0, y: 16 }}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.6, ease, delay: 0.9 }}
+          >
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {projects.map((project) => {
+                const hasAction = !!(project.details || project.link)
+                return (
+                  <div
+                    key={project.title}
+                    className={`shrink-0 w-28 h-36 relative rounded-xl overflow-hidden border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.4)] snap-start transition-transform duration-200 active:scale-95 ${hasAction ? "cursor-pointer" : ""}`}
+                    onClick={() => handleCardClick(project)}
+                  >
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url('${project.image}')` }}
+                    />
+                    <div className="absolute inset-0 bg-black/10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                    <div className="relative h-full p-2 flex flex-col justify-end">
+                      <p className="text-[8px] font-medium text-white/70 uppercase tracking-wider leading-tight">
+                        {project.role}
+                        {project.comingSoon && <span className="ml-1 normal-case text-white/40">· soon</span>}
+                      </p>
+                      <h3 className="text-[10px] font-bold text-white leading-tight">
+                        {project.title}
+                      </h3>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
         </div>
       </section>
 
