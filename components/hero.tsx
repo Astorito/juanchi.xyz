@@ -36,10 +36,8 @@ export function Hero({ ready = false }: HeroProps) {
   useEffect(() => {
     if (!ready) return
 
-    // Phase 3: robot appears 600ms after ready
     const robotTimer = setTimeout(() => setRobotVisible(true), 600)
 
-    // Phase 4: cards appear 1000ms after ready, staggered
     const cardsTimer = setTimeout(() => {
       animate(
         ".floating-card",
@@ -64,12 +62,13 @@ export function Hero({ ready = false }: HeroProps) {
 
   return (
     <>
+      {/* ── DESKTOP HERO ─────────────────────────────────────── */}
       <section
         id="hero"
         ref={scope}
-        className="min-h-screen flex items-center justify-center px-6 lg:px-8 pt-20 pb-8 relative md:overflow-hidden bg-black"
+        className="hidden md:flex min-h-screen items-center justify-center px-6 lg:px-8 pt-20 pb-4 relative overflow-hidden bg-black"
       >
-        {/* Robot — phase 3, fades in after H1+H2 */}
+        {/* Robot */}
         <motion.div
           className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
           initial={{ opacity: 0 }}
@@ -84,8 +83,8 @@ export function Hero({ ready = false }: HeroProps) {
           </div>
         </motion.div>
 
-        {/* Floating project cards — z-10, phase 4, desktop only */}
-        <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none hidden md:block">
+        {/* Floating cards */}
+        <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none">
           {projects.map((project, i) => {
             const pos = positions[i] ?? positions[0]
             const hasAction = !!(project.details || project.link)
@@ -117,10 +116,10 @@ export function Hero({ ready = false }: HeroProps) {
           })}
         </Floating>
 
-        {/* Text + mobile cards — z-50 */}
-        <div className="max-w-5xl w-full mx-auto text-center relative z-50 -mt-8 md:-mt-48 flex flex-col items-center gap-4">
+        {/* Text */}
+        <div className="max-w-5xl w-full mx-auto text-center space-y-4 relative z-50 -mt-48">
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-heading tracking-tight text-white"
+            className="text-6xl lg:text-8xl font-heading tracking-tight text-white"
             initial={{ opacity: 0, y: 28 }}
             animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
             transition={{ duration: 0.7, ease }}
@@ -135,44 +134,85 @@ export function Hero({ ready = false }: HeroProps) {
           >
             I build technology, strategy and chaos into something valuable
           </motion.p>
+        </div>
+      </section>
 
-          {/* Mobile project cards strip — visible only below md */}
-          <motion.div
-            className="md:hidden w-full mt-4"
+      {/* ── MOBILE HERO ──────────────────────────────────────── */}
+      <section
+        id="hero"
+        className="md:hidden flex flex-col min-h-screen bg-black pt-20 overflow-hidden"
+      >
+        {/* 1 — Text */}
+        <div className="px-6 pt-6 pb-4 text-center flex flex-col gap-2 shrink-0">
+          <motion.h1
+            className="text-4xl sm:text-5xl font-heading tracking-tight text-white"
+            initial={{ opacity: 0, y: 24 }}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            transition={{ duration: 0.7, ease }}
+          >
+            Juanchi Martinez
+          </motion.h1>
+          <motion.p
+            className="text-sm text-muted-foreground leading-relaxed mx-auto max-w-xs"
             initial={{ opacity: 0, y: 16 }}
             animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-            transition={{ duration: 0.6, ease, delay: 0.9 }}
+            transition={{ duration: 0.7, ease, delay: 0.2 }}
           >
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {projects.map((project) => {
-                const hasAction = !!(project.details || project.link)
-                return (
-                  <div
-                    key={project.title}
-                    className={`shrink-0 w-28 h-36 relative rounded-xl overflow-hidden border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.4)] snap-start transition-transform duration-200 active:scale-95 ${hasAction ? "cursor-pointer" : ""}`}
-                    onClick={() => handleCardClick(project)}
-                  >
-                    <div
-                      className="absolute inset-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url('${project.image}')` }}
-                    />
-                    <div className="absolute inset-0 bg-black/10" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-                    <div className="relative h-full p-2 flex flex-col justify-end">
-                      <p className="text-[8px] font-medium text-white/70 uppercase tracking-wider leading-tight">
-                        {project.role}
-                        {project.comingSoon && <span className="ml-1 normal-case text-white/40">· soon</span>}
-                      </p>
-                      <h3 className="text-[10px] font-bold text-white leading-tight">
-                        {project.title}
-                      </h3>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </motion.div>
+            I build technology, strategy and chaos into something valuable
+          </motion.p>
         </div>
+
+        {/* 2 — Cards carousel */}
+        <motion.div
+          className="shrink-0 py-2"
+          initial={{ opacity: 0, y: 16 }}
+          animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+          transition={{ duration: 0.6, ease, delay: 0.5 }}
+        >
+          <div className="flex gap-3 overflow-x-auto px-6 pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {projects.map((project) => {
+              const hasAction = !!(project.details || project.link)
+              return (
+                <div
+                  key={project.title}
+                  className={`shrink-0 w-28 h-36 relative rounded-xl overflow-hidden border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.4)] snap-start transition-transform duration-200 active:scale-95 ${hasAction ? "cursor-pointer" : ""}`}
+                  onClick={() => handleCardClick(project)}
+                >
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url('${project.image}')` }}
+                  />
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                  <div className="relative h-full p-2 flex flex-col justify-end">
+                    <p className="text-[8px] font-medium text-white/70 uppercase tracking-wider leading-tight">
+                      {project.role}
+                      {project.comingSoon && <span className="ml-1 normal-case text-white/40">· soon</span>}
+                    </p>
+                    <h3 className="text-[10px] font-bold text-white leading-tight">
+                      {project.title}
+                    </h3>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        {/* 3 — Robot (fills remaining space) */}
+        <motion.div
+          className="flex-1 relative min-h-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: robotVisible ? 1 : 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{ transform: "scale(0.75) translateY(-5%)", transformOrigin: "center center" }}
+          >
+            <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="w-full h-full" />
+          </div>
+        </motion.div>
       </section>
 
       <ProjectModal
