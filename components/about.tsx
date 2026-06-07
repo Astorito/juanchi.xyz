@@ -51,7 +51,7 @@ export function About() {
         id="about"
         ref={containerRef}
         className="relative"
-        style={{ height: "340vh" }}
+        style={{ height: "420vh" }}
       >
         <div className="sticky top-0 h-screen w-full flex flex-col justify-center px-6 lg:px-20 bg-background/80 backdrop-blur-xl overflow-hidden">
           <div className="max-w-6xl w-full space-y-8 pt-20">
@@ -66,7 +66,7 @@ export function About() {
                   key={i}
                   word={word}
                   progress={scrollYProgress}
-                  range={[i / total, Math.min((i + 2) / total, 1)]}
+                  range={[i / total, Math.min((i + 1.5) / total, 1)]}
                 />
               ))}
             </p>
@@ -77,7 +77,7 @@ export function About() {
 
       {/* ── Stats — separate fixed section below ───────────── */}
       <section className="px-6 lg:px-20 py-16 bg-background/80 backdrop-blur-xl border-t border-white/5">
-        <div className="max-w-6xl w-full grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-6xl w-full grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div className="space-y-1">
             <div className="font-bold text-4xl lg:text-5xl text-primary">200+</div>
             <div className="text-sm text-muted-foreground">Team Members</div>
