@@ -44,62 +44,58 @@ export function About() {
   const words = ABOUT_TEXT.split(/\s+/).filter(Boolean)
   const total = words.length
 
-  // Stats fade in near end of scroll
-  const statsOpacity = useTransform(scrollYProgress, [0.82, 0.97], [0, 1])
-  const statsY = useTransform(scrollYProgress, [0.82, 0.97], [24, 0])
-
   return (
-    <section
-      id="about"
-      ref={containerRef}
-      className="relative"
-      style={{ height: "360vh" }}
-    >
-      {/* Sticky panel — stays fixed while user scrolls through the container */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center px-6 lg:px-20 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl w-full space-y-8">
+    <>
+      {/* ── Word-reveal sticky section ─────────────────────── */}
+      <div
+        id="about"
+        ref={containerRef}
+        className="relative"
+        style={{ height: "340vh" }}
+      >
+        <div className="sticky top-0 h-screen w-full flex flex-col justify-center px-6 lg:px-20 bg-background/80 backdrop-blur-xl overflow-hidden">
+          <div className="max-w-6xl w-full space-y-8 pt-20">
 
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            About Me
-          </h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight shrink-0">
+              About Me
+            </h2>
 
-          {/* Word-by-word reveal */}
-          <p className="text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed [hyphens:none]">
-            {words.map((word, i) => (
-              <Word
-                key={i}
-                word={word}
-                progress={scrollYProgress}
-                range={[i / total, Math.min((i + 2) / total, 1)]}
-              />
-            ))}
-          </p>
+            <p className="text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed [hyphens:none]">
+              {words.map((word, i) => (
+                <Word
+                  key={i}
+                  word={word}
+                  progress={scrollYProgress}
+                  range={[i / total, Math.min((i + 2) / total, 1)]}
+                />
+              ))}
+            </p>
 
-          {/* Stats — appear when text is fully revealed */}
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-2"
-            style={{ opacity: statsOpacity, y: statsY }}
-          >
-            <div className="space-y-1">
-              <div className="font-bold text-4xl lg:text-5xl text-primary">200+</div>
-              <div className="text-sm text-muted-foreground">Team Members</div>
-            </div>
-            <div className="space-y-1">
-              <div className="font-bold text-4xl lg:text-5xl text-foreground">4+</div>
-              <div className="text-sm text-muted-foreground">Countries</div>
-            </div>
-            <div className="space-y-1">
-              <div className="font-bold text-4xl lg:text-5xl text-primary">8+</div>
-              <div className="text-sm text-muted-foreground">Years</div>
-            </div>
-            <div className="space-y-1">
-              <div className="font-bold text-4xl lg:text-5xl text-foreground">9+</div>
-              <div className="text-sm text-muted-foreground">Ventures</div>
-            </div>
-          </motion.div>
-
+          </div>
         </div>
       </div>
-    </section>
+
+      {/* ── Stats — separate fixed section below ───────────── */}
+      <section className="px-6 lg:px-20 py-16 bg-background/80 backdrop-blur-xl border-t border-white/5">
+        <div className="max-w-6xl w-full grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="space-y-1">
+            <div className="font-bold text-4xl lg:text-5xl text-primary">200+</div>
+            <div className="text-sm text-muted-foreground">Team Members</div>
+          </div>
+          <div className="space-y-1">
+            <div className="font-bold text-4xl lg:text-5xl">4+</div>
+            <div className="text-sm text-muted-foreground">Countries</div>
+          </div>
+          <div className="space-y-1">
+            <div className="font-bold text-4xl lg:text-5xl text-primary">8+</div>
+            <div className="text-sm text-muted-foreground">Years</div>
+          </div>
+          <div className="space-y-1">
+            <div className="font-bold text-4xl lg:text-5xl">9+</div>
+            <div className="text-sm text-muted-foreground">Ventures</div>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
