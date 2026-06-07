@@ -24,7 +24,10 @@ function Word({
   const opacity = useTransform(progress, range, [0.12, 1])
   const color = useTransform(progress, range, ["#52525b", "#ffffff"])
   return (
-    <motion.span style={{ opacity, color }} className="inline mr-[0.3em]">
+    <motion.span
+      style={{ opacity, color }}
+      className="inline-block mr-[0.28em] break-keep"
+    >
       {word}
     </motion.span>
   )
@@ -53,15 +56,15 @@ export function About() {
       style={{ height: "360vh" }}
     >
       {/* Sticky panel — stays fixed while user scrolls through the container */}
-      <div className="sticky top-0 h-screen flex flex-col justify-center px-6 lg:px-8 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto w-full space-y-10">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center px-6 lg:px-16 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-3xl w-full space-y-8">
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
             About Me
           </h2>
 
           {/* Word-by-word reveal */}
-          <p className="text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed">
+          <p className="text-lg md:text-xl lg:text-2xl font-medium leading-relaxed [hyphens:none]">
             {words.map((word, i) => (
               <Word
                 key={i}
@@ -74,23 +77,23 @@ export function About() {
 
           {/* Stats — appear when text is fully revealed */}
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-2"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-2"
             style={{ opacity: statsOpacity, y: statsY }}
           >
             <div className="space-y-1">
-              <div className="font-bold text-5xl lg:text-6xl text-primary">200+</div>
+              <div className="font-bold text-4xl lg:text-5xl text-primary">200+</div>
               <div className="text-sm text-muted-foreground">Team Members</div>
             </div>
             <div className="space-y-1">
-              <div className="font-bold text-5xl lg:text-6xl text-foreground">4+</div>
+              <div className="font-bold text-4xl lg:text-5xl text-foreground">4+</div>
               <div className="text-sm text-muted-foreground">Countries</div>
             </div>
             <div className="space-y-1">
-              <div className="font-bold text-5xl lg:text-6xl text-primary">8+</div>
+              <div className="font-bold text-4xl lg:text-5xl text-primary">8+</div>
               <div className="text-sm text-muted-foreground">Years</div>
             </div>
             <div className="space-y-1">
-              <div className="font-bold text-5xl lg:text-6xl text-foreground">9+</div>
+              <div className="font-bold text-4xl lg:text-5xl text-foreground">9+</div>
               <div className="text-sm text-muted-foreground">Ventures</div>
             </div>
           </motion.div>
