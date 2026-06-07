@@ -1,52 +1,100 @@
-export function About() {
+"use client"
+
+import { useRef } from "react"
+import { motion, useScroll, useTransform, type MotionValue } from "motion/react"
+
+const ABOUT_TEXT =
+  "I'm an AI Solutions Specialist and founder who builds at the intersection of technology, strategy, and business. " +
+  "I've launched multiple AI ventures — from virtual try-on engines and generative media platforms to civic intelligence systems and RAG agents for logistics. " +
+  "I don't just advise on AI. I architect it, ship it, and scale it. " +
+  "Leading teams of over 200 people across four countries, I've learned that great technology means nothing without the execution to match. " +
+  "My edge is turning ambiguity into working product — fast. " +
+  "Whether it's a full AI integration roadmap, a production-ready MVP, or a pipeline that replaces a team of analysts, " +
+  "I move from idea to impact with speed and precision."
+
+function Word({
+  word,
+  progress,
+  range,
+}: {
+  word: string
+  progress: MotionValue<number>
+  range: [number, number]
+}) {
+  const opacity = useTransform(progress, range, [0.12, 1])
+  const color = useTransform(progress, range, ["#52525b", "#ffffff"])
   return (
-    <section id="about" className="py-24 lg:py-32 px-6 lg:px-8 bg-secondary/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="space-y-12">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance">About Me</h2>
+    <motion.span style={{ opacity, color }} className="inline mr-[0.3em]">
+      {word}
+    </motion.span>
+  )
+}
 
-          <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
-            <p className="text-foreground/90">
-              I'm a seasoned Project Manager and Creative Strategist with extensive experience in building cutting-edge
-              technology solutions and leading high-performance teams.
-            </p>
+export function About() {
+  const containerRef = useRef<HTMLDivElement>(null)
 
-            <p>
-              Throughout my career, I've had the privilege of leading teams of over 250 people, coordinating complex
-              international projects across multiple regions. My expertise spans project management, technology
-              implementation, and strategic innovation.
-            </p>
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  })
 
-            <p>
-              I specialize in the energy sector, transparency applications, and AI agent development. I'm passionate
-              about leveraging technology to solve real-world problems and create meaningful impact.
-            </p>
+  const words = ABOUT_TEXT.split(/\s+/).filter(Boolean)
+  const total = words.length
 
-            <p>
-              My approach combines strategic thinking with hands-on execution, ensuring that projects not only meet
-              their goals but exceed expectations. I thrive in dynamic environments where innovation and collaboration
-              drive success.
-            </p>
-          </div>
+  // Stats fade in near end of scroll
+  const statsOpacity = useTransform(scrollYProgress, [0.82, 0.97], [0, 1])
+  const statsY = useTransform(scrollYProgress, [0.82, 0.97], [24, 0])
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8">
-            <div className="space-y-2">
-              <div className="font-bold text-6xl text-primary">250+</div>
+  return (
+    <section
+      id="about"
+      ref={containerRef}
+      className="relative"
+      style={{ height: "360vh" }}
+    >
+      {/* Sticky panel — stays fixed while user scrolls through the container */}
+      <div className="sticky top-0 h-screen flex flex-col justify-center px-6 lg:px-8 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto w-full space-y-10">
+
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+            About Me
+          </h2>
+
+          {/* Word-by-word reveal */}
+          <p className="text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed">
+            {words.map((word, i) => (
+              <Word
+                key={i}
+                word={word}
+                progress={scrollYProgress}
+                range={[i / total, Math.min((i + 2) / total, 1)]}
+              />
+            ))}
+          </p>
+
+          {/* Stats — appear when text is fully revealed */}
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-2"
+            style={{ opacity: statsOpacity, y: statsY }}
+          >
+            <div className="space-y-1">
+              <div className="font-bold text-5xl lg:text-6xl text-primary">200+</div>
               <div className="text-sm text-muted-foreground">Team Members</div>
             </div>
-            <div className="space-y-2">
-              <div className="font-bold text-secondary-foreground text-6xl">5+</div>
+            <div className="space-y-1">
+              <div className="font-bold text-5xl lg:text-6xl text-foreground">4+</div>
               <div className="text-sm text-muted-foreground">Countries</div>
             </div>
-            <div className="space-y-2">
-              <div className="font-bold text-6xl text-primary">8+</div>
+            <div className="space-y-1">
+              <div className="font-bold text-5xl lg:text-6xl text-primary">8+</div>
               <div className="text-sm text-muted-foreground">Years</div>
             </div>
-            <div className="space-y-2">
-              <div className="font-bold text-secondary-foreground text-6xl">20+</div>
-              <div className="text-sm text-muted-foreground">Projects</div>
+            <div className="space-y-1">
+              <div className="font-bold text-5xl lg:text-6xl text-foreground">9+</div>
+              <div className="text-sm text-muted-foreground">Ventures</div>
             </div>
-          </div>
+          </motion.div>
+
         </div>
       </div>
     </section>
