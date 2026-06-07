@@ -56,15 +56,15 @@ export function About() {
       style={{ height: "360vh" }}
     >
       {/* Sticky panel — stays fixed while user scrolls through the container */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center px-6 lg:px-16 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-3xl w-full space-y-8">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center px-6 lg:px-20 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-6xl w-full space-y-8">
 
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
             About Me
           </h2>
 
           {/* Word-by-word reveal */}
-          <p className="text-lg md:text-xl lg:text-2xl font-medium leading-relaxed [hyphens:none]">
+          <p className="text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed [hyphens:none]">
             {words.map((word, i) => (
               <Word
                 key={i}
