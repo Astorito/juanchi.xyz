@@ -6,35 +6,47 @@ import { ProjectModal } from "@/components/project-modal"
 import { projects, type Project } from "@/lib/projects"
 
 // ─── Arc geometry ────────────────────────────────────────────────────────────
-const R = 340          // circle radius px
-const CARD_W = 96      // card width  (4:3)
-const CARD_H = 72      // card height (4:3)
-const N = projects.length
-const A_MAX = 170      // left edge of arc  (deg, math convention)
-const A_MIN = 10       // right edge of arc (deg, math convention)
-const SPACING = (A_MAX - A_MIN) / (N - 1)   // 20° between cards
-const PERIOD  = N * SPACING                  // 180° full loop
-const FADE    = 24     // deg of fade zone at each edge
-const SPEED   = 0.004  // deg / ms
+const R       = 340   // radius px
+const CARD_W  = 72    // portrait 3:4
+const CARD_H  = 96    // portrait 3:4
+const N       = projects.length
+const A_MAX   = 170   // left edge (math deg, CCW from +x)
+const A_MIN   = 10    // right edge
+const SPACING = (A_MAX - A_MIN) / (N - 1)  // 20° between cards
+const PERIOD  = N * SPACING                 // 180° loop period
+const FADE    = 26    // deg of invisible buffer beyond arc edge
+const SPEED   = 0.004 // deg / ms
 
-// Container origin is bottom-center; profile+text anchored at the circle center
-const ORIGIN_X = R + CARD_W               // px from container left  (= CONT_W/2)
-const ORIGIN_Y = R + CARD_H               // px from container top   (= circle center)
-const CONT_W   = 2 * (R + CARD_W)
-const CONT_H   = R + CARD_H + 140         // extra space for profile + text below arc center
+// Container: origin = center of the circle = bottom-center of card arc
+const CARD_MAX = Math.max(CARD_W, CARD_H) // = 96
+const ORIGIN_X = R + CARD_MAX
+const ORIGIN_Y = R + CARD_MAX
+const CONT_W   = 2 * (R + CARD_MAX)
+const CONT_H   = R + CARD_MAX + 148       // +148 for profile + text below center
 
+// Mist overlay width on each side (pixels)
+const MIST_W = 200
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function effectiveAngle(baseAngle: number, offset: number): number {
   const raw = PERIOD - ((A_MAX - baseAngle + offset) % PERIOD + PERIOD) % PERIOD
   return A_MAX - raw
 }
 
+// Cards stay fully opaque within the arc; only hide them in the wrap-around zone
 function cardOpacity(deg: number): number {
-  const lo = A_MIN - FADE
-  const hi = A_MAX + FADE
+  const lo = A_MIN - FADE - 8
+  const hi = A_MAX + FADE + 8
   if (deg <= lo || deg >= hi) return 0
-  if (deg < A_MIN + FADE) return (deg - lo) / (2 * FADE)
-  if (deg > A_MAX - FADE) return (hi - deg) / (2 * FADE)
+  // Tiny cross-fade at the invisible boundary so there's no hard pop
+  if (deg < A_MIN - FADE) return (deg - lo) / 8
+  if (deg > A_MAX + FADE) return (hi - deg) / 8
   return 1
+}
+
+// Rotation so the card's long axis always points through the circle center
+function cardRotation(deg: number): number {
+  return 90 - deg
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -47,14 +59,12 @@ export function Hero({ ready = false }: HeroProps) {
   const lastTime = useRef<number | null>(null)
   const rafId    = useRef<number | null>(null)
 
-  // Fade-in on ready
   useEffect(() => {
     if (!ready) return
     const t = setTimeout(() => setVisible(true), 200)
     return () => clearTimeout(t)
   }, [ready])
 
-  // Continuous arc rotation
   useEffect(() => {
     if (!ready) return
     const tick = (now: number) => {
@@ -83,19 +93,13 @@ export function Hero({ ready = false }: HeroProps) {
         style={{ background: "#f5f4f1" }}
       >
         {/* Handwritten watermark */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute inset-0 overflow-hidden"
-        >
+        <div aria-hidden="true" className="pointer-events-none select-none absolute inset-0 overflow-hidden">
           <span style={{
-            position: "absolute",
-            top: "20%",
-            left: "-1%",
+            position: "absolute", top: "20%", left: "-1%",
             fontFamily: "var(--font-dancing), cursive",
             fontSize: "clamp(80px, 10vw, 145px)",
             color: "rgba(0,0,0,0.055)",
-            whiteSpace: "nowrap",
-            lineHeight: 1,
+            whiteSpace: "nowrap", lineHeight: 1,
           }}>
             here&apos;s my story
           </span>
@@ -106,81 +110,93 @@ export function Hero({ ready = false }: HeroProps) {
           className="flex flex-col items-center relative z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: visible ? 1 : 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Arc container – origin at bottom-center */}
-          <div
-            className="relative"
-            style={{ width: CONT_W, height: CONT_H }}
-          >
+          {/* Arc container */}
+          <div className="relative" style={{ width: CONT_W, height: CONT_H }}>
+
+            {/* Cards */}
             {projects.map((project, i) => {
               const baseAngle = A_MAX - i * SPACING
-              const deg  = effectiveAngle(baseAngle, arcOffset)
-              const rad  = (deg * Math.PI) / 180
-              const x    = ORIGIN_X + R * Math.cos(rad)
-              const y    = ORIGIN_Y - R * Math.sin(rad)
-              const op   = cardOpacity(deg)
+              const deg = effectiveAngle(baseAngle, arcOffset)
+              const rad = (deg * Math.PI) / 180
+              const x   = ORIGIN_X + R * Math.cos(rad)
+              const y   = ORIGIN_Y - R * Math.sin(rad)
+              const rot = cardRotation(deg)
+              const op  = cardOpacity(deg)
               const hasAction = !!(project.details || project.link)
 
               return (
                 <div
                   key={project.title}
-                  onClick={() => hasAction && handleClick(project)}
+                  aria-hidden={op === 0}
                   style={{
                     position: "absolute",
                     left: x,
                     top: y,
-                    width: CARD_W,
-                    height: CARD_H,
-                    borderRadius: 14,
-                    overflow: "hidden",
+                    // Outer div: position + radial rotation, updated every frame
+                    transform: `translate(-50%, -50%) rotate(${rot}deg)`,
                     opacity: op,
-                    transform: "translate(-50%, -50%)",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.13)",
-                    cursor: hasAction ? "pointer" : "default",
-                    transition: "transform 0.15s",
+                    zIndex: 2,
                   }}
-                  onMouseEnter={e => { if (hasAction) (e.currentTarget as HTMLDivElement).style.transform = "translate(-50%,-50%) scale(1.1)" }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-50%,-50%) scale(1)" }}
                 >
-                  <div style={{
-                    width: "100%", height: "100%",
-                    backgroundImage: `url('${project.image}')`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }} />
+                  {/* Inner div: card size, shadow, hover scale */}
+                  <div
+                    onClick={() => hasAction && handleClick(project)}
+                    style={{
+                      width: CARD_W,
+                      height: CARD_H,
+                      borderRadius: 13,
+                      overflow: "hidden",
+                      boxShadow: "0 4px 22px rgba(0,0,0,0.14)",
+                      cursor: hasAction ? "pointer" : "default",
+                      transition: "transform 0.18s ease",
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.1)" }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)" }}
+                  >
+                    <div style={{
+                      width: "100%", height: "100%",
+                      backgroundImage: `url('${project.image}')`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }} />
+                  </div>
                 </div>
               )
             })}
 
-            {/* Profile anchored at the arc's circle center (bottom-center of container) */}
-            <div
-              style={{
-                position: "absolute",
-                left: ORIGIN_X,
-                top: ORIGIN_Y,
-                transform: "translate(-50%, -50%)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
+            {/* ── Mist overlays (above cards, below profile) ─────── */}
+            <div aria-hidden="true" style={{
+              position: "absolute", left: 0, top: 0, bottom: 0,
+              width: MIST_W, zIndex: 4, pointerEvents: "none",
+              background: `linear-gradient(to right, #f5f4f1 20%, rgba(245,244,241,0.75) 55%, transparent 100%)`,
+            }} />
+            <div aria-hidden="true" style={{
+              position: "absolute", right: 0, top: 0, bottom: 0,
+              width: MIST_W, zIndex: 4, pointerEvents: "none",
+              background: `linear-gradient(to left, #f5f4f1 20%, rgba(245,244,241,0.75) 55%, transparent 100%)`,
+            }} />
+
+            {/* Profile at circle center */}
+            <div style={{
+              position: "absolute",
+              left: ORIGIN_X, top: ORIGIN_Y,
+              transform: "translate(-50%, -50%)",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+              zIndex: 6,
+            }}>
               <div style={{
-                width: 72, height: 72,
-                borderRadius: "50%",
-                background: "#e8520a",
-                overflow: "hidden",
+                width: 72, height: 72, borderRadius: "50%",
+                background: "#e8520a", overflow: "hidden",
                 boxShadow: "0 4px 18px rgba(232,82,10,0.28)",
               }}>
                 <div style={{
                   width: "100%", height: "100%",
                   backgroundImage: "url('/placeholder-user.jpg')",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
+                  backgroundSize: "cover", backgroundPosition: "center",
                 }} />
               </div>
-
               <div style={{ textAlign: "center", fontFamily: "var(--font-raleway), sans-serif" }}>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#1a1a1a", marginBottom: 4 }}>
                   Juanchi Martinez
@@ -190,6 +206,7 @@ export function Hero({ ready = false }: HeroProps) {
                 </p>
               </div>
             </div>
+
           </div>
         </motion.div>
       </section>
@@ -234,14 +251,13 @@ export function Hero({ ready = false }: HeroProps) {
                 <div
                   key={project.title}
                   className={`shrink-0 snap-start ${hasAction ? "cursor-pointer" : ""}`}
-                  style={{ width: 90, height: 68, borderRadius: 14, overflow: "hidden", boxShadow: "0 3px 12px rgba(0,0,0,0.12)", flexShrink: 0 }}
+                  style={{ width: 72, height: 96, borderRadius: 13, overflow: "hidden", boxShadow: "0 3px 12px rgba(0,0,0,0.12)", flexShrink: 0 }}
                   onClick={() => hasAction && handleClick(project)}
                 >
                   <div style={{
                     width: "100%", height: "100%",
                     backgroundImage: `url('${project.image}')`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    backgroundSize: "cover", backgroundPosition: "center",
                   }} />
                 </div>
               )
@@ -250,13 +266,18 @@ export function Hero({ ready = false }: HeroProps) {
         </motion.div>
 
         <motion.div
-          className="flex-1 flex items-center justify-center"
+          className="flex-1 flex flex-col items-center justify-center gap-3"
           initial={{ opacity: 0 }}
           animate={ready ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
         >
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#e8520a", overflow: "hidden" }}>
             <div style={{ width: "100%", height: "100%", backgroundImage: "url('/placeholder-user.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
+          </div>
+          <div style={{ textAlign: "center", fontFamily: "var(--font-raleway), sans-serif" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#1a1a1a" }}>
+              Juanchi Martinez
+            </p>
           </div>
         </motion.div>
       </section>
