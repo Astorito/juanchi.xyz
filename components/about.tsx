@@ -3,6 +3,10 @@
 import { useRef } from "react"
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react"
 
+const BG  = "#f5f4f1"
+const DIM = "#c9c5be"   // barely-visible on cream → not-yet-revealed words
+const LIT = "#111111"   // near-black → revealed words
+
 const ABOUT_TEXT =
   "I'm an AI Solutions Specialist and founder who builds at the intersection of technology, strategy, and business. " +
   "I've launched multiple AI ventures — from virtual try-on engines and generative media platforms to civic intelligence systems and RAG agents for logistics. " +
@@ -21,8 +25,8 @@ function Word({
   progress: MotionValue<number>
   range: [number, number]
 }) {
-  const opacity = useTransform(progress, range, [0.12, 1])
-  const color = useTransform(progress, range, ["#52525b", "#ffffff"])
+  const opacity = useTransform(progress, range, [0.18, 1])
+  const color   = useTransform(progress, range, [DIM, LIT])
   return (
     <motion.span
       style={{ opacity, color }}
@@ -53,10 +57,16 @@ export function About() {
         className="relative"
         style={{ height: "420vh" }}
       >
-        <div className="sticky top-0 h-screen w-full flex flex-col justify-center px-6 lg:px-20 bg-background/80 backdrop-blur-xl overflow-hidden">
+        <div
+          className="sticky top-0 h-screen w-full flex flex-col justify-center px-6 lg:px-20 overflow-hidden"
+          style={{ background: BG }}
+        >
           <div className="max-w-6xl w-full space-y-8 pt-20">
 
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight shrink-0">
+            <h2
+              className="text-4xl md:text-5xl font-bold tracking-tight shrink-0"
+              style={{ color: LIT }}
+            >
               About Me
             </h2>
 
@@ -75,25 +85,23 @@ export function About() {
         </div>
       </div>
 
-      {/* ── Stats — separate fixed section below ───────────── */}
-      <section className="px-6 lg:px-20 py-16 bg-background/80 backdrop-blur-xl border-t border-white/5">
+      {/* ── Stats ──────────────────────────────────────────── */}
+      <section
+        className="px-6 lg:px-20 py-16"
+        style={{ background: BG, borderTop: "1px solid rgba(0,0,0,0.06)" }}
+      >
         <div className="max-w-6xl w-full grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div className="space-y-1">
-            <div className="font-bold text-4xl lg:text-5xl text-primary">200+</div>
-            <div className="text-sm text-muted-foreground">Team Members</div>
-          </div>
-          <div className="space-y-1">
-            <div className="font-bold text-4xl lg:text-5xl">4+</div>
-            <div className="text-sm text-muted-foreground">Countries</div>
-          </div>
-          <div className="space-y-1">
-            <div className="font-bold text-4xl lg:text-5xl text-primary">8+</div>
-            <div className="text-sm text-muted-foreground">Years</div>
-          </div>
-          <div className="space-y-1">
-            <div className="font-bold text-4xl lg:text-5xl">9+</div>
-            <div className="text-sm text-muted-foreground">Ventures</div>
-          </div>
+          {[
+            { value: "200+", label: "Team Members" },
+            { value: "4+",   label: "Countries"    },
+            { value: "8+",   label: "Years"        },
+            { value: "9+",   label: "Ventures"     },
+          ].map(({ value, label }) => (
+            <div key={label} className="space-y-1">
+              <div className="font-bold text-4xl lg:text-5xl" style={{ color: LIT }}>{value}</div>
+              <div className="text-sm" style={{ color: "#888" }}>{label}</div>
+            </div>
+          ))}
         </div>
       </section>
     </>
