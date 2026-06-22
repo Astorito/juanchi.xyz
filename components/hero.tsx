@@ -15,13 +15,13 @@ const A_MIN = 10       // right edge of arc (deg, math convention)
 const SPACING = (A_MAX - A_MIN) / (N - 1)   // 20° between cards
 const PERIOD  = N * SPACING                  // 180° full loop
 const FADE    = 24     // deg of fade zone at each edge
-const SPEED   = 0.009  // deg / ms
+const SPEED   = 0.004  // deg / ms
 
-// Container origin is bottom-center; cards are placed relative to it
-const ORIGIN_X = R + CARD_W               // px from container left
-const ORIGIN_Y = R + CARD_H              // px from container top  (= container height)
+// Container origin is bottom-center; profile+text anchored at the circle center
+const ORIGIN_X = R + CARD_W               // px from container left  (= CONT_W/2)
+const ORIGIN_Y = R + CARD_H               // px from container top   (= circle center)
 const CONT_W   = 2 * (R + CARD_W)
-const CONT_H   = R + CARD_H
+const CONT_H   = R + CARD_H + 140         // extra space for profile + text below arc center
 
 function effectiveAngle(baseAngle: number, offset: number): number {
   const raw = PERIOD - ((A_MAX - baseAngle + offset) % PERIOD + PERIOD) % PERIOD
@@ -119,7 +119,6 @@ export function Hero({ ready = false }: HeroProps) {
               const rad  = (deg * Math.PI) / 180
               const x    = ORIGIN_X + R * Math.cos(rad)
               const y    = ORIGIN_Y - R * Math.sin(rad)
-              const rot  = deg - 90
               const op   = cardOpacity(deg)
               const hasAction = !!(project.details || project.link)
 
@@ -136,13 +135,13 @@ export function Hero({ ready = false }: HeroProps) {
                     borderRadius: 14,
                     overflow: "hidden",
                     opacity: op,
-                    transform: `translate(-50%, -50%) rotate(${rot}deg)`,
+                    transform: "translate(-50%, -50%)",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.13)",
                     cursor: hasAction ? "pointer" : "default",
                     transition: "transform 0.15s",
                   }}
-                  onMouseEnter={e => { if (hasAction) (e.currentTarget as HTMLDivElement).style.transform = `translate(-50%,-50%) rotate(${rot}deg) scale(1.1)` }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = `translate(-50%,-50%) rotate(${rot}deg) scale(1)` }}
+                  onMouseEnter={e => { if (hasAction) (e.currentTarget as HTMLDivElement).style.transform = "translate(-50%,-50%) scale(1.1)" }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translate(-50%,-50%) scale(1)" }}
                 >
                   <div style={{
                     width: "100%", height: "100%",
@@ -153,32 +152,43 @@ export function Hero({ ready = false }: HeroProps) {
                 </div>
               )
             })}
-          </div>
 
-          {/* Profile + text — snaps right under the arc */}
-          <div className="flex flex-col items-center gap-3 mt-2">
-            <div style={{
-              width: 72, height: 72,
-              borderRadius: "50%",
-              background: "#e8520a",
-              overflow: "hidden",
-              boxShadow: "0 4px 18px rgba(232,82,10,0.3)",
-            }}>
+            {/* Profile anchored at the arc's circle center (bottom-center of container) */}
+            <div
+              style={{
+                position: "absolute",
+                left: ORIGIN_X,
+                top: ORIGIN_Y,
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
               <div style={{
-                width: "100%", height: "100%",
-                backgroundImage: "url('/placeholder-user.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }} />
-            </div>
+                width: 72, height: 72,
+                borderRadius: "50%",
+                background: "#e8520a",
+                overflow: "hidden",
+                boxShadow: "0 4px 18px rgba(232,82,10,0.28)",
+              }}>
+                <div style={{
+                  width: "100%", height: "100%",
+                  backgroundImage: "url('/placeholder-user.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }} />
+              </div>
 
-            <div className="text-center" style={{ fontFamily: "var(--font-raleway), sans-serif" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#1a1a1a", marginBottom: 5 }}>
-                Juanchi Martinez
-              </p>
-              <p style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#aaa" }}>
-                Product Builder · AI Strategist
-              </p>
+              <div style={{ textAlign: "center", fontFamily: "var(--font-raleway), sans-serif" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#1a1a1a", marginBottom: 4 }}>
+                  Juanchi Martinez
+                </p>
+                <p style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#aaa" }}>
+                  Product Builder · AI Strategist
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>

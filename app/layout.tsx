@@ -4,11 +4,12 @@ import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-import { Raleway, DM_Sans as V0_Font_DM_Sans, Geist_Mono as V0_Font_Geist_Mono, Dancing_Script } from 'next/font/google'
+import { Raleway, Montserrat, DM_Sans as V0_Font_DM_Sans, Geist_Mono as V0_Font_Geist_Mono, Dancing_Script } from 'next/font/google'
 
 const _dmSans = V0_Font_DM_Sans({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900","1000"] })
 const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
 const raleway = Raleway({ subsets: ['latin'], weight: ["400","500","600","700","800","900"], variable: '--font-raleway' })
+const montserrat = Montserrat({ subsets: ['latin'], weight: ["400","500","600","700"], variable: '--font-montserrat' })
 const dancingScript = Dancing_Script({ subsets: ['latin'], weight: ["400", "700"], variable: '--font-dancing' })
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${raleway.variable} ${dancingScript.variable} font-sans antialiased`} style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
+      <body className={`${raleway.variable} ${montserrat.variable} ${dancingScript.variable} font-sans antialiased`} style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
         {children}
         <Analytics />
       </body>
