@@ -11,7 +11,6 @@ const ABOUT_TEXT =
   "I'm an AI Solutions Specialist and founder who builds at the intersection of technology, strategy, and business. " +
   "I've launched multiple AI ventures — from virtual try-on engines and generative media platforms to civic intelligence systems and RAG agents for logistics. " +
   "I'm a hands-on leader who takes full ownership from strategy to execution, always driving tech towards business metrics. " +
-  "Having led cross-border teams across multiple countries, I know great technology is worthless without operational results. " +
   "I thrive in ambiguity, transforming complex ideas into working products fast. " +
   "From building AI roadmaps to automating operations, my focus is simply on delivering real business value."
 
