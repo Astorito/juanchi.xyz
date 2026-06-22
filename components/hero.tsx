@@ -2,27 +2,23 @@
 
 import { useEffect, useState } from "react"
 import { motion, stagger, useAnimate } from "motion/react"
-
-import Floating, { FloatingElement } from "@/components/ui/parallax-floating"
-import { InteractiveRobotSpline } from "@/components/ui/interactive-3d-robot"
 import { ProjectModal } from "@/components/project-modal"
 import { projects, type Project } from "@/lib/projects"
 
-const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode"
-
-const positions = [
-  { className: "top-[4%] left-[8%]",         depth: 0.5, size: "w-32 h-32 md:w-40 md:h-40" },
-  { className: "top-[3%] left-[32%]",         depth: 1,   size: "w-36 h-36 md:w-44 md:h-44" },
-  { className: "top-[8%] left-[48%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
-  { className: "top-[38%] left-[6%]",         depth: 1,   size: "w-32 h-32 md:w-40 md:h-40" },
-  { className: "top-[20%] right-[3%]",        depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
-  { className: "top-[68%] left-[13%]",        depth: 4,   size: "w-36 h-36 md:w-48 md:h-48" },
-  { className: "top-[55%] right-[4%]",        depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
-  { className: "top-[65%] right-[11%]",       depth: 2,   size: "w-32 h-40 md:w-40 md:h-48" },
-  { className: "top-[3%] left-[62%]",         depth: 1,   size: "w-28 h-28 md:w-36 md:h-36" },
-]
-
 const ease = [0.16, 1, 0.3, 1] as const
+
+const ARC_RADIUS = 340
+const ANGLE_START = 172
+const ANGLE_END = 8
+
+function getArcPosition(index: number, total: number) {
+  const angleDeg = ANGLE_START - (ANGLE_START - ANGLE_END) * (index / (total - 1))
+  const angleRad = (angleDeg * Math.PI) / 180
+  const x = ARC_RADIUS * Math.cos(angleRad)
+  const y = -ARC_RADIUS * Math.sin(angleRad)
+  const rotation = angleDeg - 90
+  return { x, y, rotation }
+}
 
 interface HeroProps {
   ready?: boolean
@@ -31,121 +27,152 @@ interface HeroProps {
 export function Hero({ ready = false }: HeroProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [scope, animate] = useAnimate()
-  const [robotVisible, setRobotVisible] = useState(false)
 
   useEffect(() => {
     if (!ready) return
-
-    const robotTimer = setTimeout(() => setRobotVisible(true), 600)
-
-    const cardsTimer = setTimeout(() => {
+    const timer = setTimeout(() => {
       animate(
-        ".floating-card",
-        { opacity: [0, 1] },
-        { duration: 0.5, delay: stagger(0.12) }
+        ".arc-card",
+        { opacity: [0, 1], scale: [0.8, 1] },
+        { duration: 0.45, delay: stagger(0.07) }
       )
-    }, 1000)
-
-    return () => {
-      clearTimeout(robotTimer)
-      clearTimeout(cardsTimer)
-    }
+    }, 350)
+    return () => clearTimeout(timer)
   }, [ready, animate])
 
   const handleCardClick = (project: Project) => {
-    if (project.details) {
-      setSelectedProject(project)
-    } else if (project.link) {
-      window.open(project.link, "_blank", "noopener,noreferrer")
-    }
+    if (project.details) setSelectedProject(project)
+    else if (project.link) window.open(project.link, "_blank", "noopener,noreferrer")
   }
 
   return (
     <>
-      {/* ── DESKTOP HERO ─────────────────────────────────────── */}
+      {/* ── DESKTOP ─────────────────────────────────────────── */}
       <section
         id="hero"
         ref={scope}
-        className="hidden md:flex min-h-screen items-center justify-center px-6 lg:px-8 pt-20 pb-4 relative overflow-hidden bg-black"
+        className="hidden md:block relative min-h-screen overflow-hidden"
+        style={{ background: "#f5f4f1" }}
       >
-        {/* Robot */}
-        <motion.div
-          className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: robotVisible ? 1 : 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+        {/* Handwritten background text */}
+        <div
+          className="absolute inset-0 pointer-events-none select-none overflow-hidden"
+          aria-hidden="true"
         >
-          <div
-            className="w-full h-full"
-            style={{ transform: "translateY(20%) scale(0.65)", transformOrigin: "center center" }}
+          <span
+            style={{
+              position: "absolute",
+              top: "18%",
+              left: "-1%",
+              fontFamily: "var(--font-dancing), cursive",
+              fontSize: "clamp(90px, 11vw, 155px)",
+              color: "rgba(0,0,0,0.07)",
+              whiteSpace: "nowrap",
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
+            }}
           >
-            <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="w-full h-full" />
+            here&apos;s my story
+          </span>
+        </div>
+
+        {/* Arc of project cards */}
+        {projects.map((project, i) => {
+          const { x, y, rotation } = getArcPosition(i, projects.length)
+          const hasAction = !!(project.details || project.link)
+
+          return (
+            <motion.div
+              key={project.title}
+              className={`arc-card absolute opacity-0 overflow-hidden ${hasAction ? "cursor-pointer" : ""}`}
+              style={{
+                width: 96,
+                height: 96,
+                borderRadius: 22,
+                left: `calc(50% + ${x}px)`,
+                top: `calc(53% + ${y}px)`,
+                transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+                boxShadow: "0 4px 18px rgba(0,0,0,0.14)",
+              }}
+              whileHover={{ scale: 1.1, zIndex: 20 }}
+              transition={{ type: "spring", stiffness: 320, damping: 22 }}
+              onClick={() => handleCardClick(project)}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundImage: `url('${project.image}')`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+            </motion.div>
+          )
+        })}
+
+        {/* Center: profile circle + name */}
+        <motion.div
+          className="absolute"
+          style={{ left: "50%", top: "66%", transform: "translate(-50%, -50%)" }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{ duration: 0.7, ease, delay: 0.65 }}
+        >
+          <div className="flex flex-col items-center gap-3">
+            <div
+              className="rounded-full overflow-hidden"
+              style={{ width: 76, height: 76, background: "#e8520a" }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundImage: "url('/placeholder-user.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+            </div>
+            <div className="text-center">
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "#1a1a1a",
+                  marginBottom: 4,
+                }}
+              >
+                Juanchi Martinez
+              </p>
+              <p
+                style={{
+                  fontSize: 10,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "#999",
+                }}
+              >
+                Product Builder · AI Strategist
+              </p>
+            </div>
           </div>
         </motion.div>
-
-        {/* Floating cards */}
-        <Floating sensitivity={-1} className="z-10 overflow-hidden pointer-events-none">
-          {projects.map((project, i) => {
-            const pos = positions[i] ?? positions[0]
-            const hasAction = !!(project.details || project.link)
-
-            return (
-              <FloatingElement key={project.title} depth={pos.depth} className={pos.className}>
-                <motion.div
-                  className={`floating-card pointer-events-auto opacity-0 ${pos.size} relative rounded-xl overflow-hidden border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.4)] transition-transform duration-300 hover:scale-105 ${hasAction ? "cursor-pointer" : ""}`}
-                  onClick={() => handleCardClick(project)}
-                >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${project.image}')` }}
-                  />
-                  <div className="absolute inset-0 bg-black/10" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-                  <div className="relative h-full p-2 md:p-3 flex flex-col justify-end">
-                    <p className="text-[9px] md:text-[10px] font-medium text-white/70 uppercase tracking-wider leading-tight">
-                      {project.role}
-                      {project.comingSoon && <span className="ml-1 normal-case text-white/40">· soon</span>}
-                    </p>
-                    <h3 className="text-xs md:text-sm font-bold text-white leading-tight">
-                      {project.title}
-                    </h3>
-                  </div>
-                </motion.div>
-              </FloatingElement>
-            )
-          })}
-        </Floating>
-
-        {/* Text */}
-        <div className="max-w-5xl w-full mx-auto text-center space-y-4 relative z-50 -mt-48">
-          <motion.h1
-            className="text-6xl lg:text-8xl font-heading tracking-tight text-white"
-            initial={{ opacity: 0, y: 28 }}
-            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-            transition={{ duration: 0.7, ease }}
-          >
-            Juanchi Martinez
-          </motion.h1>
-          <motion.p
-            className="text-base lg:text-lg text-muted-foreground max-w-2xl leading-relaxed text-center mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.7, ease, delay: 0.25 }}
-          >
-            I build technology, strategy and chaos into something valuable
-          </motion.p>
-        </div>
       </section>
 
-      {/* ── MOBILE HERO ──────────────────────────────────────── */}
+      {/* ── MOBILE ──────────────────────────────────────────── */}
       <section
         id="hero"
-        className="md:hidden flex flex-col min-h-screen bg-black pt-20 overflow-hidden"
+        className="md:hidden flex flex-col min-h-screen pt-20 overflow-hidden"
+        style={{ background: "#f5f4f1" }}
       >
-        {/* 1 — Text */}
+        {/* Name + tagline */}
         <div className="px-6 pt-6 pb-4 text-center flex flex-col gap-2 shrink-0">
           <motion.h1
-            className="text-4xl sm:text-5xl font-heading tracking-tight text-white"
+            className="text-4xl sm:text-5xl font-heading tracking-tight"
+            style={{ color: "#1a1a1a" }}
             initial={{ opacity: 0, y: 24 }}
             animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
             transition={{ duration: 0.7, ease }}
@@ -153,7 +180,8 @@ export function Hero({ ready = false }: HeroProps) {
             Juanchi Martinez
           </motion.h1>
           <motion.p
-            className="text-sm text-muted-foreground leading-relaxed mx-auto max-w-xs"
+            className="text-sm leading-relaxed mx-auto max-w-xs"
+            style={{ color: "#888" }}
             initial={{ opacity: 0, y: 16 }}
             animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
             transition={{ duration: 0.7, ease, delay: 0.2 }}
@@ -162,12 +190,12 @@ export function Hero({ ready = false }: HeroProps) {
           </motion.p>
         </div>
 
-        {/* 2 — Cards carousel */}
+        {/* Cards carousel */}
         <motion.div
-          className="shrink-0 py-2"
+          className="shrink-0 py-4"
           initial={{ opacity: 0, y: 16 }}
           animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.6, ease, delay: 0.5 }}
+          transition={{ duration: 0.6, ease, delay: 0.45 }}
         >
           <div className="flex gap-3 overflow-x-auto px-6 pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {projects.map((project) => {
@@ -175,42 +203,40 @@ export function Hero({ ready = false }: HeroProps) {
               return (
                 <div
                   key={project.title}
-                  className={`shrink-0 w-28 h-36 relative rounded-xl overflow-hidden border border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.4)] snap-start transition-transform duration-200 active:scale-95 ${hasAction ? "cursor-pointer" : ""}`}
+                  className={`shrink-0 w-[90px] h-[90px] overflow-hidden snap-start transition-transform duration-200 active:scale-95 ${hasAction ? "cursor-pointer" : ""}`}
+                  style={{ borderRadius: 18, boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}
                   onClick={() => handleCardClick(project)}
                 >
                   <div
-                    className="absolute inset-0 bg-cover bg-center"
+                    className="w-full h-full bg-cover bg-center"
                     style={{ backgroundImage: `url('${project.image}')` }}
                   />
-                  <div className="absolute inset-0 bg-black/10" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-                  <div className="relative h-full p-2 flex flex-col justify-end">
-                    <p className="text-[8px] font-medium text-white/70 uppercase tracking-wider leading-tight">
-                      {project.role}
-                      {project.comingSoon && <span className="ml-1 normal-case text-white/40">· soon</span>}
-                    </p>
-                    <h3 className="text-[10px] font-bold text-white leading-tight">
-                      {project.title}
-                    </h3>
-                  </div>
                 </div>
               )
             })}
           </div>
         </motion.div>
 
-        {/* 3 — Robot (fills remaining space) */}
+        {/* Profile */}
         <motion.div
-          className="flex-1 relative min-h-0"
+          className="flex-1 flex flex-col items-center justify-center gap-3 pb-8"
           initial={{ opacity: 0 }}
-          animate={{ opacity: robotVisible ? 1 : 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          animate={ready ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
         >
           <div
-            className="absolute inset-0"
-            style={{ transform: "scale(0.75) translateY(-5%)", transformOrigin: "center center" }}
+            className="rounded-full overflow-hidden"
+            style={{ width: 72, height: 72, background: "#e8520a" }}
           >
-            <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="w-full h-full" />
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundImage: "url('/placeholder-user.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
           </div>
         </motion.div>
       </section>
