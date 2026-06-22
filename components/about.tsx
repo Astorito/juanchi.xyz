@@ -8,6 +8,8 @@ const DIM = "#c9c5be"   // barely-visible on cream → not-yet-revealed words
 const LIT = "#111111"   // near-black → revealed words
 
 const ABOUT_TEXT =
+  "I'm an AI Solutions Specialist and founder who builds at the intersection of technology, strategy, and business. " +
+  "I've launched multiple AI ventures — from virtual try-on engines and generative media platforms to civic intelligence systems and RAG agents for logistics. " +
   "I'm a hands-on leader who takes full ownership from strategy to execution, always driving tech towards business metrics. " +
   "Having led cross-border teams across multiple countries, I know great technology is worthless without operational results. " +
   "I thrive in ambiguity, transforming complex ideas into working products fast. " +
