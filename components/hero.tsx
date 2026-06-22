@@ -15,7 +15,7 @@ const A_MIN   = 10     // right edge of arc
 const SPACING = (A_MAX - A_MIN) / (N - 1)   // 20° between cards
 const PERIOD  = N * SPACING                  // 180° — full loop
 const SPEED   = 0.002  // deg / ms  (~90 s per full loop)
-const MIST_W  = 210    // px gradient overlay on each side
+const MIST_W  = 150    // px gradient overlay on each side
 
 const CARD_MAX = Math.max(CARD_W, CARD_H)    // 96
 const ORIGIN_X = R + CARD_MAX                // horizontal center of container
@@ -30,21 +30,31 @@ function effectiveAngle(baseAngle: number, offset: number): number {
   // Result is always in (A_MAX-PERIOD, A_MAX] = (-10°, 170°]
 }
 
-// Opacity is 0 at both wrap boundaries (-10° and 170°), peaks at 1 in the middle.
-// Linear ramp over a 30° fade zone at each end → no visible jump when cards wrap.
+// Opacity 0 at both wrap boundaries, 15° fade zone (was 30) so cards stay visible longer
 function cardOpacity(deg: number): number {
-  const lo      = A_MAX - PERIOD   // -10° — wrap boundary
-  const hi      = A_MAX            // 170° — wrap boundary
-  const FADE    = 30               // degrees of ramp at each end
+  const lo   = A_MAX - PERIOD   // -10°
+  const hi   = A_MAX            // 170°
+  const FADE = 15
   if (deg <= lo || deg >= hi) return 0
   if (deg < lo + FADE) return (deg - lo) / FADE
   if (deg > hi - FADE) return (hi - deg) / FADE
   return 1
 }
 
-// Card long-axis always points through the circle center (radial orientation)
 function cardRotation(deg: number): number {
   return 90 - deg
+}
+
+// Compute arc position for card i at a given offset
+function arcPosition(i: number, offset: number) {
+  const deg = effectiveAngle(A_MAX - i * SPACING, offset)
+  const rad = (deg * Math.PI) / 180
+  return {
+    cx:  ORIGIN_X + R * Math.cos(rad),
+    cy:  ORIGIN_Y - R * Math.sin(rad),
+    rot: cardRotation(deg),
+    op:  cardOpacity(deg),
+  }
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -52,45 +62,83 @@ interface HeroProps { ready?: boolean }
 
 export function Hero({ ready = false }: HeroProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [visible, setVisible]                 = useState(false)
+  const [visible,  setVisible]  = useState(false)
+  const [arcReady, setArcReady] = useState(false)
 
-  // Refs for direct DOM manipulation — no React re-renders during animation
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const rafRef   = useRef<number | null>(null)
 
+  // Name / profile fade-in
   useEffect(() => {
     if (!ready) return
     const t = setTimeout(() => setVisible(true), 200)
     return () => clearTimeout(t)
   }, [ready])
 
-  // Animation loop — updates card DOM directly, zero React re-renders per frame
+  // ── Entrance animation ─────────────────────────────────────────────────────
+  // After loader finishes: name appears first (200ms), then cards drop
+  // sequentially from above their arc position into place (90ms stagger each).
+  // After all cards land, CSS transitions are stripped and rAF loop takes over.
   useEffect(() => {
     if (!ready) return
+
+    const ENTRANCE_DELAY = 500   // ms after ready before first card drops
+    const STAGGER        = 90    // ms between each card
+    const DROP_DURATION  = 650   // ms per card transition
+    const timers: ReturnType<typeof setTimeout>[] = []
+
+    // Set all cards to starting position: at arc location but 90px above, invisible
+    for (let i = 0; i < N; i++) {
+      const el = cardRefs.current[i]
+      if (!el) continue
+      const { cx, cy, rot } = arcPosition(i, 0)
+      el.style.transition = "none"
+      el.style.transform  = `translate3d(${cx}px,${cy - 90}px,0) translate(-50%,-50%) rotate(${rot}deg)`
+      el.style.opacity    = "0"
+    }
+
+    // Stagger: enable transition then animate to final arc position
+    for (let i = 0; i < N; i++) {
+      const t = setTimeout(() => {
+        const el = cardRefs.current[i]
+        if (!el) return
+        const { cx, cy, rot, op } = arcPosition(i, 0)
+        el.style.transition = `transform ${DROP_DURATION}ms cubic-bezier(.16,1,.3,1), opacity ${Math.round(DROP_DURATION * 0.55)}ms ease`
+        el.style.transform  = `translate3d(${cx}px,${cy}px,0) translate(-50%,-50%) rotate(${rot}deg)`
+        el.style.opacity    = String(op)
+      }, ENTRANCE_DELAY + i * STAGGER)
+      timers.push(t)
+    }
+
+    // After all cards have landed: strip transitions, hand off to rAF loop
+    const totalMs = ENTRANCE_DELAY + (N - 1) * STAGGER + DROP_DURATION + 80
+    const doneTimer = setTimeout(() => {
+      for (let i = 0; i < N; i++) {
+        const el = cardRefs.current[i]
+        if (el) el.style.transition = "none"
+      }
+      setArcReady(true)
+    }, totalMs)
+    timers.push(doneTimer)
+
+    return () => timers.forEach(clearTimeout)
+  }, [ready])
+
+  // ── Continuous arc rotation (rAF loop) ────────────────────────────────────
+  useEffect(() => {
+    if (!arcReady) return
 
     let offset    = 0
     let lastTime: number | null = null
 
     const tick = (now: number) => {
-      if (lastTime !== null) {
-        offset += SPEED * (now - lastTime)
-      }
+      if (lastTime !== null) offset += SPEED * (now - lastTime)
       lastTime = now
 
       for (let i = 0; i < N; i++) {
         const el = cardRefs.current[i]
         if (!el) continue
-
-        const deg = effectiveAngle(A_MAX - i * SPACING, offset)
-        const rad = (deg * Math.PI) / 180
-        const cx  = ORIGIN_X + R * Math.cos(rad)   // desired center X
-        const cy  = ORIGIN_Y - R * Math.sin(rad)   // desired center Y
-        const rot = cardRotation(deg)
-        const op  = cardOpacity(deg)
-
-        // Only touch `transform` and `opacity` — both are GPU compositor ops,
-        // no layout reflow. translate3d promotes to its own layer.
-        // translate(-50%,-50%) centers the card on (cx, cy) without left/top.
+        const { cx, cy, rot, op } = arcPosition(i, offset)
         el.style.transform = `translate3d(${cx}px,${cy}px,0) translate(-50%,-50%) rotate(${rot}deg)`
         el.style.opacity   = String(op)
       }
@@ -100,7 +148,7 @@ export function Hero({ ready = false }: HeroProps) {
 
     rafRef.current = requestAnimationFrame(tick)
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
-  }, [ready])
+  }, [arcReady])
 
   const handleClick = (project: Project) => {
     if (project.details) setSelectedProject(project)
@@ -128,20 +176,12 @@ export function Hero({ ready = false }: HeroProps) {
           </span>
         </div>
 
-        {/* Centered column */}
-        <motion.div
-          className="flex flex-col items-center relative z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: visible ? 1 : 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Arc container */}
+        <div className="flex flex-col items-center relative z-10">
           <div className="relative" style={{ width: CONT_W, height: CONT_H }}>
 
-            {/* Cards — positioned via direct DOM in rAF loop */}
+            {/* Cards — positioned via entrance anim then rAF loop */}
             {projects.map((project, i) => {
               const hasAction = !!(project.details || project.link)
-              // left/top are fixed at 0 — only transform+opacity change each frame
               return (
                 <div
                   key={project.title}
@@ -178,26 +218,31 @@ export function Hero({ ready = false }: HeroProps) {
               )
             })}
 
-            {/* Mist overlays — cream bleeds in from edges, above cards */}
+            {/* Mist overlays */}
             <div aria-hidden="true" style={{
               position: "absolute", left: 0, top: 0, bottom: 0,
               width: MIST_W, zIndex: 4, pointerEvents: "none",
-              background: `linear-gradient(to right, #f5f4f1 22%, rgba(245,244,241,0.78) 52%, transparent 100%)`,
+              background: `linear-gradient(to right, #f5f4f1 18%, rgba(245,244,241,0.72) 55%, transparent 100%)`,
             }} />
             <div aria-hidden="true" style={{
               position: "absolute", right: 0, top: 0, bottom: 0,
               width: MIST_W, zIndex: 4, pointerEvents: "none",
-              background: `linear-gradient(to left, #f5f4f1 22%, rgba(245,244,241,0.78) 52%, transparent 100%)`,
+              background: `linear-gradient(to left, #f5f4f1 18%, rgba(245,244,241,0.72) 55%, transparent 100%)`,
             }} />
 
-            {/* Profile — anchored at circle center, above mist */}
-            <div style={{
-              position: "absolute",
-              left: ORIGIN_X, top: ORIGIN_Y,
-              transform: "translate(-50%, -50%)",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-              zIndex: 6,
-            }}>
+            {/* Profile — fades in together with name */}
+            <motion.div
+              style={{
+                position: "absolute",
+                left: ORIGIN_X, top: ORIGIN_Y,
+                transform: "translate(-50%, -50%)",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                zIndex: 6,
+              }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
               <div style={{
                 width: 72, height: 72, borderRadius: "50%",
                 overflow: "hidden",
@@ -217,10 +262,10 @@ export function Hero({ ready = false }: HeroProps) {
                   Product Builder · AI Strategist
                 </p>
               </div>
-            </div>
+            </motion.div>
 
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ── MOBILE ───────────────────────────────────────────── */}
