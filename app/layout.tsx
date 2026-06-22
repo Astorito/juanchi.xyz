@@ -4,16 +4,12 @@ import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-import { Inter, Montserrat, DM_Sans as V0_Font_DM_Sans, Geist_Mono as V0_Font_Geist_Mono, Dancing_Script } from 'next/font/google'
+import { Raleway, DM_Sans as V0_Font_DM_Sans, Geist_Mono as V0_Font_Geist_Mono, Dancing_Script } from 'next/font/google'
 
-// Initialize fonts
 const _dmSans = V0_Font_DM_Sans({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900","1000"] })
 const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _montserrat = Montserrat({ subsets: ['latin'], weight: ["700", "800", "900"] })
+const raleway = Raleway({ subsets: ['latin'], weight: ["400","500","600","700","800","900"], variable: '--font-raleway' })
 const dancingScript = Dancing_Script({ subsets: ['latin'], weight: ["400", "700"], variable: '--font-dancing' })
-
-// Using Inter font for clean minimalistic aesthetic
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Juanchi - Project Manager & AI Product Builder",
@@ -31,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} ${dancingScript.variable} font-sans antialiased`}>
+      <body className={`${raleway.variable} ${dancingScript.variable} font-sans antialiased`} style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
         {children}
         <Analytics />
       </body>
