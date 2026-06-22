@@ -6,45 +6,43 @@ import { ProjectModal } from "@/components/project-modal"
 import { projects, type Project } from "@/lib/projects"
 
 // ─── Arc geometry ────────────────────────────────────────────────────────────
-const R       = 340   // radius px
-const CARD_W  = 72    // portrait 3:4
-const CARD_H  = 96    // portrait 3:4
+const R       = 340    // radius px
+const CARD_W  = 72     // portrait 3:4 — 3 wide
+const CARD_H  = 96     // portrait 3:4 — 4 tall
 const N       = projects.length
-const A_MAX   = 170   // left edge (math deg, CCW from +x)
-const A_MIN   = 10    // right edge
-const SPACING = (A_MAX - A_MIN) / (N - 1)  // 20° between cards
-const PERIOD  = N * SPACING                 // 180° loop period
-const FADE    = 26    // deg of invisible buffer beyond arc edge
-const SPEED   = 0.004 // deg / ms
+const A_MAX   = 170    // left edge of arc  (math deg, CCW from +x axis)
+const A_MIN   = 10     // right edge of arc
+const SPACING = (A_MAX - A_MIN) / (N - 1)   // 20° between cards
+const PERIOD  = N * SPACING                  // 180° — full loop
+const SPEED   = 0.002  // deg / ms  (~90 s per full loop)
+const MIST_W  = 210    // px gradient overlay on each side
 
-// Container: origin = center of the circle = bottom-center of card arc
-const CARD_MAX = Math.max(CARD_W, CARD_H) // = 96
-const ORIGIN_X = R + CARD_MAX
-const ORIGIN_Y = R + CARD_MAX
-const CONT_W   = 2 * (R + CARD_MAX)
-const CONT_H   = R + CARD_MAX + 148       // +148 for profile + text below center
+const CARD_MAX = Math.max(CARD_W, CARD_H)    // 96
+const ORIGIN_X = R + CARD_MAX                // horizontal center of container
+const ORIGIN_Y = R + CARD_MAX                // vertical circle-center position
+const CONT_W   = 2 * (R + CARD_MAX)          // 872
+const CONT_H   = R + CARD_MAX + 150          // +150 for profile+text
 
-// Mist overlay width on each side (pixels)
-const MIST_W = 200
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Pure helpers (no React state involved) ───────────────────────────────────
 function effectiveAngle(baseAngle: number, offset: number): number {
   const raw = PERIOD - ((A_MAX - baseAngle + offset) % PERIOD + PERIOD) % PERIOD
   return A_MAX - raw
+  // Result is always in (A_MAX-PERIOD, A_MAX] = (-10°, 170°]
 }
 
-// Cards stay fully opaque within the arc; only hide them in the wrap-around zone
+// Opacity is 0 at both wrap boundaries (-10° and 170°), peaks at 1 in the middle.
+// Linear ramp over a 30° fade zone at each end → no visible jump when cards wrap.
 function cardOpacity(deg: number): number {
-  const lo = A_MIN - FADE - 8
-  const hi = A_MAX + FADE + 8
+  const lo      = A_MAX - PERIOD   // -10° — wrap boundary
+  const hi      = A_MAX            // 170° — wrap boundary
+  const FADE    = 30               // degrees of ramp at each end
   if (deg <= lo || deg >= hi) return 0
-  // Tiny cross-fade at the invisible boundary so there's no hard pop
-  if (deg < A_MIN - FADE) return (deg - lo) / 8
-  if (deg > A_MAX + FADE) return (hi - deg) / 8
+  if (deg < lo + FADE) return (deg - lo) / FADE
+  if (deg > hi - FADE) return (hi - deg) / FADE
   return 1
 }
 
-// Rotation so the card's long axis always points through the circle center
+// Card long-axis always points through the circle center (radial orientation)
 function cardRotation(deg: number): number {
   return 90 - deg
 }
@@ -54,10 +52,11 @@ interface HeroProps { ready?: boolean }
 
 export function Hero({ ready = false }: HeroProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [arcOffset, setArcOffset]             = useState(0)
   const [visible, setVisible]                 = useState(false)
-  const lastTime = useRef<number | null>(null)
-  const rafId    = useRef<number | null>(null)
+
+  // Refs for direct DOM manipulation — no React re-renders during animation
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const rafRef   = useRef<number | null>(null)
 
   useEffect(() => {
     if (!ready) return
@@ -65,18 +64,41 @@ export function Hero({ ready = false }: HeroProps) {
     return () => clearTimeout(t)
   }, [ready])
 
+  // Animation loop — updates card DOM directly, zero React re-renders per frame
   useEffect(() => {
     if (!ready) return
+
+    let offset    = 0
+    let lastTime: number | null = null
+
     const tick = (now: number) => {
-      if (lastTime.current !== null) {
-        const dt = now - lastTime.current
-        setArcOffset(prev => prev + SPEED * dt)
+      if (lastTime !== null) {
+        offset += SPEED * (now - lastTime)
       }
-      lastTime.current = now
-      rafId.current = requestAnimationFrame(tick)
+      lastTime = now
+
+      for (let i = 0; i < N; i++) {
+        const el = cardRefs.current[i]
+        if (!el) continue
+
+        const deg = effectiveAngle(A_MAX - i * SPACING, offset)
+        const rad = (deg * Math.PI) / 180
+        const x   = ORIGIN_X + R * Math.cos(rad)
+        const y   = ORIGIN_Y - R * Math.sin(rad)
+        const rot = cardRotation(deg)
+        const op  = cardOpacity(deg)
+
+        el.style.left      = `${x}px`
+        el.style.top       = `${y}px`
+        el.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`
+        el.style.opacity   = String(op)
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
     }
-    rafId.current = requestAnimationFrame(tick)
-    return () => { if (rafId.current) cancelAnimationFrame(rafId.current) }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
   }, [ready])
 
   const handleClick = (project: Project) => {
@@ -105,7 +127,7 @@ export function Hero({ ready = false }: HeroProps) {
           </span>
         </div>
 
-        {/* Center column */}
+        {/* Centered column */}
         <motion.div
           className="flex flex-col items-center relative z-10"
           initial={{ opacity: 0 }}
@@ -115,70 +137,58 @@ export function Hero({ ready = false }: HeroProps) {
           {/* Arc container */}
           <div className="relative" style={{ width: CONT_W, height: CONT_H }}>
 
-            {/* Cards */}
+            {/* Cards — positioned via direct DOM in rAF loop */}
             {projects.map((project, i) => {
-              const baseAngle = A_MAX - i * SPACING
-              const deg = effectiveAngle(baseAngle, arcOffset)
-              const rad = (deg * Math.PI) / 180
-              const x   = ORIGIN_X + R * Math.cos(rad)
-              const y   = ORIGIN_Y - R * Math.sin(rad)
-              const rot = cardRotation(deg)
-              const op  = cardOpacity(deg)
               const hasAction = !!(project.details || project.link)
-
+              // Initial position (center, invisible) — overwritten by rAF on first tick
               return (
                 <div
                   key={project.title}
-                  aria-hidden={op === 0}
+                  ref={el => { cardRefs.current[i] = el }}
                   style={{
                     position: "absolute",
-                    left: x,
-                    top: y,
-                    // Outer div: position + radial rotation, updated every frame
-                    transform: `translate(-50%, -50%) rotate(${rot}deg)`,
-                    opacity: op,
+                    left: ORIGIN_X, top: ORIGIN_Y,
+                    opacity: 0,
+                    transform: "translate(-50%,-50%)",
                     zIndex: 2,
                   }}
                 >
-                  {/* Inner div: card size, shadow, hover scale */}
                   <div
                     onClick={() => hasAction && handleClick(project)}
                     style={{
-                      width: CARD_W,
-                      height: CARD_H,
+                      width: CARD_W, height: CARD_H,
                       borderRadius: 13,
                       overflow: "hidden",
                       boxShadow: "0 4px 22px rgba(0,0,0,0.14)",
                       cursor: hasAction ? "pointer" : "default",
                       transition: "transform 0.18s ease",
                     }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.1)" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.08)" }}
                     onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)" }}
                   >
                     <div style={{
                       width: "100%", height: "100%",
                       backgroundImage: `url('${project.image}')`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
+                      backgroundSize: "cover", backgroundPosition: "center",
                     }} />
                   </div>
                 </div>
               )
             })}
 
-            {/* ── Mist overlays (above cards, below profile) ─────── */}
+            {/* Mist overlays — cream bleeds in from edges, above cards */}
             <div aria-hidden="true" style={{
               position: "absolute", left: 0, top: 0, bottom: 0,
               width: MIST_W, zIndex: 4, pointerEvents: "none",
-              background: `linear-gradient(to right, #f5f4f1 20%, rgba(245,244,241,0.75) 55%, transparent 100%)`,
+              background: `linear-gradient(to right, #f5f4f1 22%, rgba(245,244,241,0.78) 52%, transparent 100%)`,
             }} />
             <div aria-hidden="true" style={{
               position: "absolute", right: 0, top: 0, bottom: 0,
               width: MIST_W, zIndex: 4, pointerEvents: "none",
-              background: `linear-gradient(to left, #f5f4f1 20%, rgba(245,244,241,0.75) 55%, transparent 100%)`,
+              background: `linear-gradient(to left, #f5f4f1 22%, rgba(245,244,241,0.78) 52%, transparent 100%)`,
             }} />
 
-            {/* Profile at circle center */}
+            {/* Profile — anchored at circle center, above mist */}
             <div style={{
               position: "absolute",
               left: ORIGIN_X, top: ORIGIN_Y,
@@ -188,13 +198,13 @@ export function Hero({ ready = false }: HeroProps) {
             }}>
               <div style={{
                 width: 72, height: 72, borderRadius: "50%",
-                background: "#e8520a", overflow: "hidden",
-                boxShadow: "0 4px 18px rgba(232,82,10,0.28)",
+                overflow: "hidden",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
               }}>
                 <div style={{
                   width: "100%", height: "100%",
-                  backgroundImage: "url('/placeholder-user.jpg')",
-                  backgroundSize: "cover", backgroundPosition: "center",
+                  backgroundImage: "url('/juanchi.jpg')",
+                  backgroundSize: "cover", backgroundPosition: "center top",
                 }} />
               </div>
               <div style={{ textAlign: "center", fontFamily: "var(--font-raleway), sans-serif" }}>
@@ -271,14 +281,12 @@ export function Hero({ ready = false }: HeroProps) {
           animate={ready ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
         >
-          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#e8520a", overflow: "hidden" }}>
-            <div style={{ width: "100%", height: "100%", backgroundImage: "url('/placeholder-user.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
+          <div style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
+            <div style={{ width: "100%", height: "100%", backgroundImage: "url('/juanchi.jpg')", backgroundSize: "cover", backgroundPosition: "center top" }} />
           </div>
-          <div style={{ textAlign: "center", fontFamily: "var(--font-raleway), sans-serif" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#1a1a1a" }}>
-              Juanchi Martinez
-            </p>
-          </div>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#1a1a1a", fontFamily: "var(--font-raleway)" }}>
+            Juanchi Martinez
+          </p>
         </motion.div>
       </section>
 
