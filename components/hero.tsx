@@ -17,11 +17,12 @@ const PERIOD  = N * SPACING                  // 180° — full loop
 const SPEED   = 0.002  // deg / ms  (~90 s per full loop)
 const MIST_W  = 150    // px gradient overlay on each side
 
-const CARD_MAX = Math.max(CARD_W, CARD_H)    // 96
-const ORIGIN_X = R + CARD_MAX                // horizontal center of container
-const ORIGIN_Y = R + CARD_MAX                // vertical circle-center position
-const CONT_W   = 2 * (R + CARD_MAX)          // 872
-const CONT_H   = R + CARD_MAX + 150          // +150 for profile+text
+const CARD_MAX  = Math.max(CARD_W, CARD_H)    // 96
+const ORIGIN_X  = R + CARD_MAX                // horizontal center of container
+const ORIGIN_Y  = R + CARD_MAX                // vertical circle-center position
+const PROFILE_Y = ORIGIN_Y - Math.round(R * 0.5)  // midpoint of arc interior (= arc center)
+const CONT_W    = 2 * (R + CARD_MAX)          // 872
+const CONT_H    = R + CARD_MAX + 40           // just enough below origin for edge cards
 
 // ─── Pure helpers (no React state involved) ───────────────────────────────────
 function effectiveAngle(baseAngle: number, offset: number): number {
@@ -230,11 +231,11 @@ export function Hero({ ready = false }: HeroProps) {
               background: `linear-gradient(to left, #f5f4f1 18%, rgba(245,244,241,0.72) 55%, transparent 100%)`,
             }} />
 
-            {/* Profile — fades in together with name */}
+            {/* Profile — centered inside the arc's interior space */}
             <motion.div
               style={{
                 position: "absolute",
-                left: ORIGIN_X, top: ORIGIN_Y,
+                left: ORIGIN_X, top: PROFILE_Y,
                 transform: "translate(-50%, -50%)",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
                 zIndex: 6,
