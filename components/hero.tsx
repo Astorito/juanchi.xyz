@@ -236,25 +236,32 @@ export function Hero({ ready = false }: HeroProps) {
                 position: "absolute",
                 left: ORIGIN_X, top: ORIGIN_Y,
                 transform: "translate(-50%, -50%)",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
                 zIndex: 6,
+                textAlign: "center",
               }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div style={{
-                width: 72, height: 72, borderRadius: "50%",
-                overflow: "hidden",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
-              }}>
+              <div
+                style={{
+                  width: 108, height: 108, borderRadius: "50%",
+                  overflow: "hidden",
+                  boxShadow: "0 6px 28px rgba(0,0,0,0.18)",
+                  transition: "transform 0.35s cubic-bezier(.16,1,.3,1)",
+                  cursor: "default",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-8px)" }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)" }}
+              >
                 <div style={{
                   width: "100%", height: "100%",
                   backgroundImage: "url('/juanchi.jpg')",
                   backgroundSize: "cover", backgroundPosition: "center top",
                 }} />
               </div>
-              <div style={{ textAlign: "center", fontFamily: "var(--font-raleway), sans-serif" }}>
+              <div style={{ fontFamily: "var(--font-raleway), sans-serif" }}>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#1a1a1a", marginBottom: 4 }}>
                   Juanchi Martinez
                 </p>
@@ -328,7 +335,7 @@ export function Hero({ ready = false }: HeroProps) {
           animate={ready ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
         >
-          <div style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
+          <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
             <div style={{ width: "100%", height: "100%", backgroundImage: "url('/juanchi.jpg')", backgroundSize: "cover", backgroundPosition: "center top" }} />
           </div>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#1a1a1a", fontFamily: "var(--font-raleway)" }}>

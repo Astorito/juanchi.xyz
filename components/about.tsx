@@ -8,13 +8,10 @@ const DIM = "#c9c5be"   // barely-visible on cream → not-yet-revealed words
 const LIT = "#111111"   // near-black → revealed words
 
 const ABOUT_TEXT =
-  "I'm an AI Solutions Specialist and founder who builds at the intersection of technology, strategy, and business. " +
-  "I've launched multiple AI ventures — from virtual try-on engines and generative media platforms to civic intelligence systems and RAG agents for logistics. " +
-  "I don't just advise on AI. I architect it, ship it, and scale it. " +
-  "Leading teams of over 200 people across four countries, I've learned that great technology means nothing without the execution to match. " +
-  "My edge is turning ambiguity into working product — fast. " +
-  "Whether it's a full AI integration roadmap, a production-ready MVP, or a pipeline that replaces a team of analysts, " +
-  "I move from idea to impact with speed and precision."
+  "I'm a hands-on leader who takes full ownership from strategy to execution, always driving tech towards business metrics. " +
+  "Having led cross-border teams across multiple countries, I know great technology is worthless without operational results. " +
+  "I thrive in ambiguity, transforming complex ideas into working products fast. " +
+  "From building AI roadmaps to automating operations, my focus is simply on delivering real business value."
 
 function Word({
   word,
