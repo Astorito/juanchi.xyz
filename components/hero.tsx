@@ -234,7 +234,7 @@ export function Hero({ ready = false }: HeroProps) {
             <motion.div
               style={{
                 position: "absolute",
-                left: ORIGIN_X, top: ORIGIN_Y,
+                left: ORIGIN_X - 5, top: ORIGIN_Y - 5,
                 transform: "translate(-50%, -50%)",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
                 zIndex: 6,
