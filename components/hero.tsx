@@ -83,14 +83,15 @@ export function Hero({ ready = false }: HeroProps) {
 
         const deg = effectiveAngle(A_MAX - i * SPACING, offset)
         const rad = (deg * Math.PI) / 180
-        const x   = ORIGIN_X + R * Math.cos(rad)
-        const y   = ORIGIN_Y - R * Math.sin(rad)
+        const cx  = ORIGIN_X + R * Math.cos(rad)   // desired center X
+        const cy  = ORIGIN_Y - R * Math.sin(rad)   // desired center Y
         const rot = cardRotation(deg)
         const op  = cardOpacity(deg)
 
-        el.style.left      = `${x}px`
-        el.style.top       = `${y}px`
-        el.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`
+        // Only touch `transform` and `opacity` — both are GPU compositor ops,
+        // no layout reflow. translate3d promotes to its own layer.
+        // translate(-50%,-50%) centers the card on (cx, cy) without left/top.
+        el.style.transform = `translate3d(${cx}px,${cy}px,0) translate(-50%,-50%) rotate(${rot}deg)`
         el.style.opacity   = String(op)
       }
 
@@ -140,16 +141,17 @@ export function Hero({ ready = false }: HeroProps) {
             {/* Cards — positioned via direct DOM in rAF loop */}
             {projects.map((project, i) => {
               const hasAction = !!(project.details || project.link)
-              // Initial position (center, invisible) — overwritten by rAF on first tick
+              // left/top are fixed at 0 — only transform+opacity change each frame
               return (
                 <div
                   key={project.title}
                   ref={el => { cardRefs.current[i] = el }}
                   style={{
                     position: "absolute",
-                    left: ORIGIN_X, top: ORIGIN_Y,
+                    left: 0, top: 0,
                     opacity: 0,
-                    transform: "translate(-50%,-50%)",
+                    transform: `translate3d(${ORIGIN_X}px,${ORIGIN_Y}px,0) translate(-50%,-50%)`,
+                    willChange: "transform, opacity",
                     zIndex: 2,
                   }}
                 >
