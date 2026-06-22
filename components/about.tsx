@@ -87,7 +87,7 @@ export function About() {
           className="sticky top-0 h-screen w-full flex flex-col justify-center px-6 lg:px-20 overflow-hidden"
           style={{ background: BG }}
         >
-          <div className="max-w-6xl w-full space-y-8 pt-20">
+          <div className="max-w-6xl w-full space-y-8 pt-20 pb-20">
 
             <h2
               className="text-4xl md:text-5xl font-bold tracking-tight shrink-0"
