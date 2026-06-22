@@ -1,7 +1,7 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useScroll, useTransform, type MotionValue } from "motion/react"
+import { useEffect, useRef, useState } from "react"
+import { motion, useScroll, useTransform, useInView, type MotionValue } from "motion/react"
 
 const BG  = "#f5f4f1"
 const DIM = "#c9c5be"   // barely-visible on cream → not-yet-revealed words
@@ -34,6 +34,34 @@ function Word({
     >
       {word}
     </motion.span>
+  )
+}
+
+// ─── Count-up number ─────────────────────────────────────────────────────────
+function CountUp({ target, suffix = "", duration = 1400 }: { target: number; suffix?: string; duration?: number }) {
+  const [display, setDisplay] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+  const rafRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!inView) return
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1)
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3)
+      setDisplay(Math.round(eased * target))
+      if (t < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
+  }, [inView, target, duration])
+
+  return (
+    <div ref={ref} className="font-bold text-4xl lg:text-5xl" style={{ color: LIT }}>
+      {display}{suffix}
+    </div>
   )
 }
 
@@ -92,13 +120,13 @@ export function About() {
       >
         <div className="max-w-6xl w-full grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: "200+", label: "Team Members" },
-            { value: "4+",   label: "Countries"    },
-            { value: "8+",   label: "Years"        },
-            { value: "9+",   label: "Ventures"     },
-          ].map(({ value, label }) => (
+            { target: 200, suffix: "+", label: "Team Members" },
+            { target: 4,   suffix: "+", label: "Countries"    },
+            { target: 8,   suffix: "+", label: "Years"        },
+            { target: 9,   suffix: "+", label: "Ventures"     },
+          ].map(({ target, suffix, label }) => (
             <div key={label} className="space-y-1">
-              <div className="font-bold text-4xl lg:text-5xl" style={{ color: LIT }}>{value}</div>
+              <CountUp target={target} suffix={suffix} />
               <div className="text-sm" style={{ color: "#888" }}>{label}</div>
             </div>
           ))}
