@@ -38,18 +38,20 @@ function AboutPreview({ progress }: { progress: number }) {
       <h2 className="text-xl md:text-2xl font-semibold tracking-tight mb-3" style={{ color: LIT }}>
         About Me
       </h2>
-      <p className="text-sm md:text-base font-medium leading-relaxed [hyphens:none]">
+      <p className="text-sm md:text-base font-medium leading-relaxed [hyphens:none] text-justify">
         {ABOUT_WORDS.map((word, i) => {
           const start = i / total
           const end = Math.min((i + 1.5) / total, 1)
           const t = Math.min(Math.max((progress - start) / (end - start), 0), 1)
           return (
-            <span
-              key={i}
-              className="inline-block mr-[0.28em] break-keep"
-              style={{ opacity: 0.18 + t * 0.82, color: lerpColor(DIM, LIT, t) }}
-            >
-              {word}
+            <span key={i}>
+              <span
+                className="break-keep"
+                style={{ opacity: 0.18 + t * 0.82, color: lerpColor(DIM, LIT, t) }}
+              >
+                {word}
+              </span>
+              {i < ABOUT_WORDS.length - 1 ? " " : null}
             </span>
           )
         })}
