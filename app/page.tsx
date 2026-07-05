@@ -7,16 +7,25 @@ import { About } from "@/components/about"
 import { Contact } from "@/components/contact"
 import { Footer } from "@/components/footer"
 
+// Normalizes progress so a section starts revealing only after `start`,
+// reaching full opacity by progress === 1.
+function reveal(progress: number, start: number) {
+  return Math.min(Math.max((progress - start) / (1 - start), 0), 1)
+}
+
 export default function Home() {
-  const [showRest, setShowRest] = useState(false)
   const [heroReady, setHeroReady] = useState(false)
+  const [heroProgress, setHeroProgress] = useState(0)
 
   useEffect(() => {
     // loader hides at ~3800ms; hero sequence starts just after
     const heroTimer = setTimeout(() => setHeroReady(true), 4000)
-    const restTimer = setTimeout(() => setShowRest(true), 5200)
-    return () => { clearTimeout(heroTimer); clearTimeout(restTimer) }
+    return () => clearTimeout(heroTimer)
   }, [])
+
+  const aboutReveal = reveal(heroProgress, 0)
+  const contactReveal = reveal(heroProgress, 0.3)
+  const footerReveal = reveal(heroProgress, 0.5)
 
   return (
     <>
@@ -26,31 +35,19 @@ export default function Home() {
       <div className="fixed inset-0 z-0 bg-black" />
 
       <main className="relative z-10 min-h-screen">
-        <PortfolioHero ready={heroReady} />
-        
-        {/* Glass overlay for content below hero */}
+        <PortfolioHero ready={heroReady} onScrollProgress={setHeroProgress} />
+
+        {/* Glass overlay for content below hero — fades in as the hero cards leave the circle */}
         <div className="relative">
           <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" />
           <div className="relative z-10">
-            <div
-              className={`transition-all duration-1000 ${
-                showRest ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-              }`}
-            >
+            <div style={{ opacity: aboutReveal, transform: `translateY(${(1 - aboutReveal) * 48}px)` }}>
               <About />
             </div>
-            <div
-              className={`transition-all duration-1000 delay-500 ${
-                showRest ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-              }`}
-            >
+            <div style={{ opacity: contactReveal, transform: `translateY(${(1 - contactReveal) * 48}px)` }}>
               <Contact />
             </div>
-            <div
-              className={`transition-all duration-1000 delay-700 ${
-                showRest ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-              }`}
-            >
+            <div style={{ opacity: footerReveal, transform: `translateY(${(1 - footerReveal) * 48}px)` }}>
               <Footer />
             </div>
           </div>

@@ -154,6 +154,8 @@ export interface IntroAnimationProps {
     onImageClick?: (image: ScrollMorphHeroImage, index: number) => void;
     /** Gates the intro choreography (scatter -> line -> circle). Set to false to hold at "scatter" (fully invisible) until ready. */
     active?: boolean;
+    /** Fires with the circle→arc morph progress (0 to 1) as the user scrolls, so a parent can sync content below the hero. */
+    onScrollProgress?: (progress: number) => void;
 }
 
 export default function IntroAnimation({
@@ -170,6 +172,7 @@ export default function IntroAnimation({
     backgroundClassName = "bg-[#FAFAFA]",
     onImageClick,
     active = true,
+    onScrollProgress,
 }: IntroAnimationProps) {
     const TOTAL_IMAGES = images.length;
     const [introPhase, setIntroPhase] = useState<AnimationPhase>("scatter");
@@ -204,18 +207,24 @@ export default function IntroAnimation({
     // --- Virtual Scroll Logic ---
     const virtualScroll = useMotionValue(0);
     const scrollRef = useRef(0); // Keep track of scroll value without re-renders
+    // Once the virtual scroll hits MAX_SCROLL we stop hijacking the wheel so
+    // the page can scroll natively past the hero into the sections below.
+    const scrollUnlockedRef = useRef(false);
 
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
+            if (scrollUnlockedRef.current) return; // let native scroll take over
+
             // Prevent default to stop browser overscroll/bounce
             e.preventDefault();
 
             const newScroll = Math.min(Math.max(scrollRef.current + e.deltaY, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
             virtualScroll.set(newScroll);
+            if (newScroll >= MAX_SCROLL) scrollUnlockedRef.current = true;
         };
 
         // Touch support
@@ -224,6 +233,8 @@ export default function IntroAnimation({
             touchStartY = e.touches[0].clientY;
         };
         const handleTouchMove = (e: TouchEvent) => {
+            if (scrollUnlockedRef.current) return; // let native scroll take over
+
             const touchY = e.touches[0].clientY;
             const deltaY = touchStartY - touchY;
             touchStartY = touchY;
@@ -231,6 +242,7 @@ export default function IntroAnimation({
             const newScroll = Math.min(Math.max(scrollRef.current + deltaY, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
             virtualScroll.set(newScroll);
+            if (newScroll >= MAX_SCROLL) scrollUnlockedRef.current = true;
         };
 
         // Attach listeners to container instead of window for portability
@@ -293,7 +305,7 @@ export default function IntroAnimation({
             setCircleSettled(false);
             return;
         }
-        const t = setTimeout(() => setCircleSettled(true), 1000);
+        const t = setTimeout(() => setCircleSettled(true), 1800);
         return () => clearTimeout(t);
     }, [introPhase]);
 
@@ -337,7 +349,10 @@ export default function IntroAnimation({
     const [parallaxValue, setParallaxValue] = useState(0);
 
     useEffect(() => {
-        const unsubscribeMorph = smoothMorph.on("change", setMorphValue);
+        const unsubscribeMorph = smoothMorph.on("change", (v) => {
+            setMorphValue(v);
+            onScrollProgress?.(Math.min(Math.max(v, 0), 1));
+        });
         const unsubscribeRotate = smoothScrollRotate.on("change", setRotateValue);
         const unsubscribeParallax = smoothMouseX.on("change", setParallaxValue);
         return () => {
@@ -345,7 +360,7 @@ export default function IntroAnimation({
             unsubscribeRotate();
             unsubscribeParallax();
         };
-    }, [smoothMorph, smoothScrollRotate, smoothMouseX]);
+    }, [smoothMorph, smoothScrollRotate, smoothMouseX, onScrollProgress]);
 
     // --- Content Opacity ---
     // Fade in content when arc is formed (morphValue > 0.8)
@@ -378,17 +393,19 @@ export default function IntroAnimation({
                 </div>
 
                 {/* Arc Active Content (Fades in) */}
-                <motion.div
-                    style={{ opacity: contentOpacity, y: contentY }}
-                    className="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
-                >
-                    <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4">
-                        {contentTitle}
-                    </h2>
-                    <p className="text-sm md:text-base text-gray-600 max-w-lg leading-relaxed">
-                        {contentDescription}
-                    </p>
-                </motion.div>
+                {contentTitle && (
+                    <motion.div
+                        style={{ opacity: contentOpacity, y: contentY }}
+                        className="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4">
+                            {contentTitle}
+                        </h2>
+                        <p className="text-sm md:text-base text-gray-600 max-w-lg leading-relaxed">
+                            {contentDescription}
+                        </p>
+                    </motion.div>
+                )}
 
                 {/* Main Container */}
                 <div className="relative flex items-center justify-center w-full h-full">

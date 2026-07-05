@@ -7,9 +7,10 @@ import { projects, type Project } from "@/lib/projects"
 
 interface PortfolioHeroProps {
   ready?: boolean
+  onScrollProgress?: (progress: number) => void
 }
 
-export function PortfolioHero({ ready = false }: PortfolioHeroProps) {
+export function PortfolioHero({ ready = false, onScrollProgress }: PortfolioHeroProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   interface HeroCard {
@@ -50,11 +51,11 @@ export function PortfolioHero({ ready = false }: PortfolioHeroProps) {
         images={images}
         heroTitle="Juanchi Martinez"
         heroSubtitle="SCROLL TO EXPLORE"
-        contentTitle="Product Builder · AI Strategist"
-        contentDescription="I build technology, strategy and chaos into something valuable."
+        contentTitle=""
         backgroundClassName="bg-[#f5f4f1]"
         onImageClick={handleImageClick}
         active={ready}
+        onScrollProgress={onScrollProgress}
       />
       <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
     </section>
