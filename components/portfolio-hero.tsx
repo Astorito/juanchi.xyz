@@ -4,10 +4,16 @@ import { useState } from "react"
 import IntroAnimation, { type ScrollMorphHeroImage } from "@/components/ui/scroll-morph-hero"
 import { ProjectModal } from "@/components/project-modal"
 import { projects, type Project } from "@/lib/projects"
-import { ABOUT_TEXT } from "@/components/about"
 
 const DIM = "#c9c5be" // barely-visible on cream → not-yet-revealed words
 const LIT = "#111111" // near-black → revealed words
+
+const ABOUT_TEXT =
+  "I'm an AI Solutions Specialist and founder who builds at the intersection of technology, strategy, and business. " +
+  "I've launched multiple AI ventures — from virtual try-on engines and generative media platforms to civic intelligence systems and RAG agents for logistics. " +
+  "I'm a hands-on leader who takes full ownership from strategy to execution, always driving tech towards business metrics. " +
+  "I thrive in ambiguity, transforming complex ideas into working products fast. " +
+  "From building AI roadmaps to automating operations, my focus is simply on delivering real business value."
 
 function lerpColor(a: string, b: string, t: number) {
   const pa = parseInt(a.slice(1), 16)

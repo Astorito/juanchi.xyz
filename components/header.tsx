@@ -33,7 +33,7 @@ export function Header() {
               Projects
             </button>
             <button
-              onClick={() => scrollToSection("about")}
+              onClick={() => scrollToSection("hero")}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               About
@@ -63,7 +63,7 @@ export function Header() {
                   Projects
                 </button>
                 <button
-                  onClick={() => scrollToSection("about")}
+                  onClick={() => scrollToSection("hero")}
                   className="text-left text-lg hover:text-accent transition-colors"
                 >
                   About
