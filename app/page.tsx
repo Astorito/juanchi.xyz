@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Hero } from "@/components/hero"
+import { PortfolioHero } from "@/components/portfolio-hero"
 import { LoaderScreen } from "@/components/loader-screen"
 import { About } from "@/components/about"
 import { Contact } from "@/components/contact"
@@ -26,7 +26,7 @@ export default function Home() {
       <div className="fixed inset-0 z-0 bg-black" />
 
       <main className="relative z-10 min-h-screen">
-        <Hero ready={heroReady} />
+        <PortfolioHero ready={heroReady} />
         
         {/* Glass overlay for content below hero */}
         <div className="relative">

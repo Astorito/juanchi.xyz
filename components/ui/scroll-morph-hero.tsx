@@ -6,12 +6,20 @@ import { motion, useTransform, useSpring, useMotionValue } from "framer-motion";
 // --- Types ---
 export type AnimationPhase = "scatter" | "line" | "circle" | "bottom-strip";
 
-interface FlipCardProps {
+export interface ScrollMorphHeroImage {
     src: string;
+    title?: string;
+    subtitle?: string;
+    href?: string | null;
+}
+
+interface FlipCardProps {
+    image: ScrollMorphHeroImage;
     index: number;
     total: number;
     phase: AnimationPhase;
     target: { x: number; y: number; rotation: number; scale: number; opacity: number };
+    onClick?: (image: ScrollMorphHeroImage, index: number) => void;
 }
 
 // --- FlipCard Component ---
@@ -19,12 +27,14 @@ const IMG_WIDTH = 60;  // Reduced from 100
 const IMG_HEIGHT = 85; // Reduced from 140
 
 function FlipCard({
-    src,
+    image,
     index,
     total,
     phase,
     target,
+    onClick,
 }: FlipCardProps) {
+    const clickable = !!(onClick && (image.href !== undefined || image.title));
     return (
         <motion.div
             // Smoothly animate to the coordinates defined by the parent
@@ -49,7 +59,8 @@ function FlipCard({
                 transformStyle: "preserve-3d", // Essential for the 3D hover effect
                 perspective: "1000px",
             }}
-            className="cursor-pointer group"
+            className={`group ${clickable ? "cursor-pointer" : ""}`}
+            onClick={() => clickable && onClick?.(image, index)}
         >
             <motion.div
                 className="relative h-full w-full"
@@ -63,8 +74,8 @@ function FlipCard({
                     style={{ backfaceVisibility: "hidden" }}
                 >
                     <img
-                        src={src}
-                        alt={`hero-${index}`}
+                        src={image.src}
+                        alt={image.title ?? `hero-${index}`}
                         className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-transparent" />
@@ -72,13 +83,24 @@ function FlipCard({
 
                 {/* Back Face */}
                 <div
-                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg bg-gray-900 flex flex-col items-center justify-center p-4 border border-gray-700"
+                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg bg-gray-900 flex flex-col items-center justify-center p-2 text-center border border-gray-700"
                     style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                 >
-                    <div className="text-center">
-                        <p className="text-[8px] font-bold text-blue-400 uppercase tracking-widest mb-1">View</p>
-                        <p className="text-xs font-medium text-white">Details</p>
-                    </div>
+                    {image.title ? (
+                        <>
+                            <p className="text-[9px] font-bold text-white leading-tight line-clamp-2">{image.title}</p>
+                            {image.subtitle && (
+                                <p className="mt-1 text-[7px] uppercase tracking-widest text-blue-400 leading-tight line-clamp-2">
+                                    {image.subtitle}
+                                </p>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-[8px] font-bold text-blue-400 uppercase tracking-widest mb-1">View</p>
+                            <p className="text-xs font-medium text-white">Details</p>
+                        </>
+                    )}
                 </div>
             </motion.div>
         </motion.div>
@@ -86,11 +108,10 @@ function FlipCard({
 }
 
 // --- Main Hero Component ---
-const TOTAL_IMAGES = 20;
 const MAX_SCROLL = 3000; // Virtual scroll range
 
-// Unsplash Images
-const IMAGES = [
+// Default Unsplash images (used when no `images` prop is provided)
+const DEFAULT_IMAGES: ScrollMorphHeroImage[] = [
     "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&q=80",
     "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=300&q=80",
     "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&q=80",
@@ -111,12 +132,46 @@ const IMAGES = [
     "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=300&q=80",
     "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?w=300&q=80",
     "https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?w=300&q=80",
-];
+].map((src) => ({ src }));
 
 // Helper for linear interpolation
 const lerp = (start: number, end: number, t: number) => start * (1 - t) + end * t;
 
-export default function IntroAnimation() {
+export interface IntroAnimationProps {
+    /** Cards to display; falls back to a generic Unsplash set when omitted. */
+    images?: ScrollMorphHeroImage[];
+    /** Headline shown during the intro "circle" phase. */
+    heroTitle?: string;
+    /** Small caption under the headline during the intro phase. */
+    heroSubtitle?: string;
+    /** Headline shown once the arc has formed (post-scroll). */
+    contentTitle?: string;
+    /** Supporting copy shown once the arc has formed (post-scroll). */
+    contentDescription?: React.ReactNode;
+    /** Tailwind class for the section background. */
+    backgroundClassName?: string;
+    /** Called when a card is clicked (only fires for cards with a title or href). */
+    onImageClick?: (image: ScrollMorphHeroImage, index: number) => void;
+    /** Gates the intro choreography (scatter -> line -> circle). Set to false to hold at "scatter" (fully invisible) until ready. */
+    active?: boolean;
+}
+
+export default function IntroAnimation({
+    images = DEFAULT_IMAGES,
+    heroTitle = "The future is built on AI.",
+    heroSubtitle = "SCROLL TO EXPLORE",
+    contentTitle = "Explore Our Vision",
+    contentDescription = (
+        <>
+            Discover a world where technology meets creativity. <br className="hidden md:block" />
+            Scroll through our curated collection of innovations designed to shape the future.
+        </>
+    ),
+    backgroundClassName = "bg-[#FAFAFA]",
+    onImageClick,
+    active = true,
+}: IntroAnimationProps) {
+    const TOTAL_IMAGES = images.length;
     const [introPhase, setIntroPhase] = useState<AnimationPhase>("scatter");
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
@@ -223,21 +278,22 @@ export default function IntroAnimation() {
 
     // --- Intro Sequence ---
     useEffect(() => {
+        if (!active) return;
         const timer1 = setTimeout(() => setIntroPhase("line"), 500);
         const timer2 = setTimeout(() => setIntroPhase("circle"), 2500);
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
-    }, []);
+    }, [active]);
 
     // --- Random Scatter Positions ---
     const scatterPositions = useMemo(() => {
-        return IMAGES.map(() => ({
+        return images.map(() => ({
             x: (Math.random() - 0.5) * 1500,
             y: (Math.random() - 0.5) * 1000,
             rotation: (Math.random() - 0.5) * 180,
             scale: 0.6,
             opacity: 0,
         }));
-    }, []);
+    }, [images]);
 
     // --- Render Loop (Manual Calculation for Morph) ---
     const [morphValue, setMorphValue] = useState(0);
@@ -261,7 +317,7 @@ export default function IntroAnimation() {
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
 
     return (
-        <div ref={containerRef} className="relative w-full h-full bg-[#FAFAFA] overflow-hidden">
+        <div ref={containerRef} className={`relative w-full h-full overflow-hidden ${backgroundClassName}`}>
             {/* Container */}
             <div className="flex h-full w-full flex-col items-center justify-center perspective-1000">
 
@@ -273,7 +329,7 @@ export default function IntroAnimation() {
                         transition={{ duration: 1 }}
                         className="text-2xl font-medium tracking-tight text-gray-800 md:text-4xl"
                     >
-                        The future is built on AI.
+                        {heroTitle}
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0 }}
@@ -281,7 +337,7 @@ export default function IntroAnimation() {
                         transition={{ duration: 1, delay: 0.2 }}
                         className="mt-4 text-xs font-bold tracking-[0.2em] text-gray-500"
                     >
-                        SCROLL TO EXPLORE
+                        {heroSubtitle}
                     </motion.p>
                 </div>
 
@@ -291,17 +347,16 @@ export default function IntroAnimation() {
                     className="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
                 >
                     <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4">
-                        Explore Our Vision
+                        {contentTitle}
                     </h2>
                     <p className="text-sm md:text-base text-gray-600 max-w-lg leading-relaxed">
-                        Discover a world where technology meets creativity. <br className="hidden md:block" />
-                        Scroll through our curated collection of innovations designed to shape the future.
+                        {contentDescription}
                     </p>
                 </motion.div>
 
                 {/* Main Container */}
                 <div className="relative flex items-center justify-center w-full h-full">
-                    {IMAGES.slice(0, TOTAL_IMAGES).map((src, i) => {
+                    {images.map((image, i) => {
                         let target = { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1 };
 
                         // 1. Intro Phases (Scatter -> Line)
@@ -392,12 +447,13 @@ export default function IntroAnimation() {
 
                         return (
                             <FlipCard
-                                key={i}
-                                src={src}
+                                key={image.src + i}
+                                image={image}
                                 index={i}
                                 total={TOTAL_IMAGES}
                                 phase={introPhase} // Pass intro phase for initial animations
                                 target={target}
+                                onClick={onImageClick}
                             />
                         );
                     })}
