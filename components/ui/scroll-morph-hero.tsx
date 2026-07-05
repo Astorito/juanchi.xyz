@@ -411,7 +411,7 @@ export default function IntroAnimation({
                             const minDimension = Math.min(containerSize.width, containerSize.height);
 
                             // A. Calculate Circle Position
-                            const circleRadius = Math.min(minDimension * 0.35, 350);
+                            const circleRadius = Math.min(minDimension * 0.42, 420);
 
                             const circleAngle = (i / TOTAL_IMAGES) * 360 + autoRotateValue;
                             const circleRad = (circleAngle * Math.PI) / 180;

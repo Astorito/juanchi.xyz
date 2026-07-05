@@ -63,7 +63,7 @@ export function LoaderScreen() {
           color: "#1a1a1a",
         }}
       >
-        Juanchi Martínez Portfolio
+        Juanchi Martínez
       </p>
 
       {/* Track */}
