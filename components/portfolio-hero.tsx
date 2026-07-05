@@ -4,6 +4,53 @@ import { useState } from "react"
 import IntroAnimation, { type ScrollMorphHeroImage } from "@/components/ui/scroll-morph-hero"
 import { ProjectModal } from "@/components/project-modal"
 import { projects, type Project } from "@/lib/projects"
+import { ABOUT_TEXT } from "@/components/about"
+
+const DIM = "#c9c5be" // barely-visible on cream → not-yet-revealed words
+const LIT = "#111111" // near-black → revealed words
+
+function lerpColor(a: string, b: string, t: number) {
+  const pa = parseInt(a.slice(1), 16)
+  const pb = parseInt(b.slice(1), 16)
+  const ar = (pa >> 16) & 255, ag = (pa >> 8) & 255, ab = pa & 255
+  const br = (pb >> 16) & 255, bg = (pb >> 8) & 255, bb = pb & 255
+  const r = Math.round(ar + (br - ar) * t)
+  const g = Math.round(ag + (bg - ag) * t)
+  const b_ = Math.round(ab + (bb - ab) * t)
+  return `rgb(${r}, ${g}, ${b_})`
+}
+
+const ABOUT_WORDS = ABOUT_TEXT.split(/\s+/).filter(Boolean)
+
+// Word-by-word reveal of the About Me copy, driven by the hero's own scroll
+// progress instead of the page's — shown above the cards once they've
+// finished landing in the arc, so it plays out while the cards hold below.
+function AboutPreview({ progress }: { progress: number }) {
+  const total = ABOUT_WORDS.length
+  return (
+    <div className="max-w-2xl px-4">
+      <h2 className="text-xl md:text-2xl font-semibold tracking-tight mb-3" style={{ color: LIT }}>
+        About Me
+      </h2>
+      <p className="text-sm md:text-base font-medium leading-relaxed [hyphens:none]">
+        {ABOUT_WORDS.map((word, i) => {
+          const start = i / total
+          const end = Math.min((i + 1.5) / total, 1)
+          const t = Math.min(Math.max((progress - start) / (end - start), 0), 1)
+          return (
+            <span
+              key={i}
+              className="inline-block mr-[0.28em] break-keep"
+              style={{ opacity: 0.18 + t * 0.82, color: lerpColor(DIM, LIT, t) }}
+            >
+              {word}
+            </span>
+          )
+        })}
+      </p>
+    </div>
+  )
+}
 
 interface PortfolioHeroProps {
   ready?: boolean
@@ -51,11 +98,11 @@ export function PortfolioHero({ ready = false, onScrollProgress }: PortfolioHero
         images={images}
         heroTitle="Juanchi Martinez"
         heroSubtitle="SCROLL TO EXPLORE"
-        contentTitle=""
         backgroundClassName="bg-[#f5f4f1]"
         onImageClick={handleImageClick}
         active={ready}
         onScrollProgress={onScrollProgress}
+        overlayContent={({ arcProgress }) => <AboutPreview progress={arcProgress} />}
       />
       <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
     </section>

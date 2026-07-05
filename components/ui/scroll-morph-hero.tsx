@@ -154,8 +154,15 @@ export interface IntroAnimationProps {
     onImageClick?: (image: ScrollMorphHeroImage, index: number) => void;
     /** Gates the intro choreography (scatter -> line -> circle). Set to false to hold at "scatter" (fully invisible) until ready. */
     active?: boolean;
-    /** Fires with the circle→arc morph progress (0 to 1) as the user scrolls, so a parent can sync content below the hero. */
+    /** Fires with the overall scroll progress (0 to 1, reaching 1 as the scroll unlocks) so a parent can sync content below the hero. */
     onScrollProgress?: (progress: number) => void;
+    /**
+     * Renders custom content in the space above the arc once it has formed,
+     * in place of contentTitle/contentDescription. Receives morphValue (0→1,
+     * circle→arc) and arcProgress (0→1 over the post-arc scroll/shuffle range)
+     * so the content can reveal in lockstep with the cards.
+     */
+    overlayContent?: (state: { morphValue: number; arcProgress: number }) => React.ReactNode;
 }
 
 export default function IntroAnimation({
@@ -173,6 +180,7 @@ export default function IntroAnimation({
     onImageClick,
     active = true,
     onScrollProgress,
+    overlayContent,
 }: IntroAnimationProps) {
     const TOTAL_IMAGES = images.length;
     const [introPhase, setIntroPhase] = useState<AnimationPhase>("scatter");
@@ -262,6 +270,12 @@ export default function IntroAnimation({
     const morphProgress = useTransform(virtualScroll, [0, 600], [0, 1]);
     const smoothMorph = useSpring(morphProgress, { stiffness: 40, damping: 20 });
 
+    // Overall progress across the whole virtual scroll range (0 -> MAX_SCROLL),
+    // i.e. circle→arc morph AND the post-arc shuffle. Reaches 1 right as the
+    // scroll unlocks, so a parent can gate content below the hero on it.
+    const overallProgress = useTransform(virtualScroll, [0, MAX_SCROLL], [0, 1]);
+    const smoothOverallProgress = useSpring(overallProgress, { stiffness: 40, damping: 20 });
+
     // 2. Scroll Rotation (Shuffling): Starts after morph (e.g., > 600)
     // Rotates the bottom arc as user continues scrolling
     const scrollRotate = useTransform(virtualScroll, [600, 3000], [0, 360]);
@@ -349,23 +363,27 @@ export default function IntroAnimation({
     const [parallaxValue, setParallaxValue] = useState(0);
 
     useEffect(() => {
-        const unsubscribeMorph = smoothMorph.on("change", (v) => {
-            setMorphValue(v);
-            onScrollProgress?.(Math.min(Math.max(v, 0), 1));
-        });
+        const unsubscribeMorph = smoothMorph.on("change", setMorphValue);
         const unsubscribeRotate = smoothScrollRotate.on("change", setRotateValue);
         const unsubscribeParallax = smoothMouseX.on("change", setParallaxValue);
+        const unsubscribeOverall = smoothOverallProgress.on("change", (v) => {
+            onScrollProgress?.(Math.min(Math.max(v, 0), 1));
+        });
         return () => {
             unsubscribeMorph();
             unsubscribeRotate();
             unsubscribeParallax();
+            unsubscribeOverall();
         };
-    }, [smoothMorph, smoothScrollRotate, smoothMouseX, onScrollProgress]);
+    }, [smoothMorph, smoothScrollRotate, smoothMouseX, smoothOverallProgress, onScrollProgress]);
 
     // --- Content Opacity ---
     // Fade in content when arc is formed (morphValue > 0.8)
     const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
+
+    // Progress over the post-arc scroll/shuffle range (scroll 600 -> MAX_SCROLL), 0 to 1
+    const arcProgress = Math.min(Math.max(rotateValue / 360, 0), 1);
 
     return (
         <div ref={containerRef} className={`relative w-full h-full overflow-hidden ${backgroundClassName}`}>
@@ -393,7 +411,14 @@ export default function IntroAnimation({
                 </div>
 
                 {/* Arc Active Content (Fades in) */}
-                {contentTitle && (
+                {overlayContent ? (
+                    <motion.div
+                        style={{ opacity: contentOpacity, y: contentY }}
+                        className="absolute top-[8%] z-10 flex flex-col items-center justify-center text-center px-4 w-full"
+                    >
+                        {overlayContent({ morphValue, arcProgress })}
+                    </motion.div>
+                ) : contentTitle && (
                     <motion.div
                         style={{ opacity: contentOpacity, y: contentY }}
                         className="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"

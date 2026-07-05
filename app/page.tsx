@@ -23,9 +23,12 @@ export default function Home() {
     return () => clearTimeout(heroTimer)
   }, [])
 
-  const aboutReveal = reveal(heroProgress, 0)
-  const contactReveal = reveal(heroProgress, 0.3)
-  const footerReveal = reveal(heroProgress, 0.5)
+  // heroProgress now spans the whole hero interaction (circle→arc morph +
+  // shuffle, where the About Me preview plays out) — reaches 1 right as the
+  // hero unlocks scroll, so these only need to catch up in the final stretch.
+  const aboutReveal = reveal(heroProgress, 0.7)
+  const contactReveal = reveal(heroProgress, 0.8)
+  const footerReveal = reveal(heroProgress, 0.9)
 
   return (
     <>
