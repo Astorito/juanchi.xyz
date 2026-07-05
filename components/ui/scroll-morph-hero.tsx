@@ -284,6 +284,42 @@ export default function IntroAnimation({
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
     }, [active]);
 
+    // Cards take ~1s to spring into their circle positions after the phase
+    // flips — wait for that settle before showing the title (so it appears
+    // once the circumference is actually formed, not mid-assembly).
+    const [circleSettled, setCircleSettled] = useState(false);
+    useEffect(() => {
+        if (introPhase !== "circle") {
+            setCircleSettled(false);
+            return;
+        }
+        const t = setTimeout(() => setCircleSettled(true), 1000);
+        return () => clearTimeout(t);
+    }, [introPhase]);
+
+    // --- Slow Idle Rotation (circle phase only) ---
+    const autoRotate = useMotionValue(0);
+    const [autoRotateValue, setAutoRotateValue] = useState(0);
+    useEffect(() => {
+        if (introPhase !== "circle") return;
+        const ROTATION_SPEED = 360 / (240 * 1000); // one full turn every 4 minutes
+        let frame: number;
+        let lastTime: number | null = null;
+
+        const tick = (now: number) => {
+            if (lastTime !== null) autoRotate.set(autoRotate.get() + ROTATION_SPEED * (now - lastTime));
+            lastTime = now;
+            frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+    }, [introPhase, autoRotate]);
+
+    useEffect(() => {
+        const unsubscribe = autoRotate.on("change", setAutoRotateValue);
+        return () => unsubscribe();
+    }, [autoRotate]);
+
     // --- Random Scatter Positions ---
     const scatterPositions = useMemo(() => {
         return images.map(() => ({
@@ -325,7 +361,7 @@ export default function IntroAnimation({
                 <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2">
                     <motion.h1
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                        animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" } : { opacity: 0, filter: "blur(10px)" }}
+                        animate={circleSettled && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" } : { opacity: 0, filter: "blur(10px)" }}
                         transition={{ duration: 1 }}
                         className="text-2xl font-medium tracking-tight text-gray-800 md:text-4xl"
                     >
@@ -333,7 +369,7 @@ export default function IntroAnimation({
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0 }}
-                        animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 0.5 - morphValue } : { opacity: 0 }}
+                        animate={circleSettled && morphValue < 0.5 ? { opacity: 0.5 - morphValue } : { opacity: 0 }}
                         transition={{ duration: 1, delay: 0.2 }}
                         className="mt-4 text-xs font-bold tracking-[0.2em] text-gray-500"
                     >
@@ -377,7 +413,7 @@ export default function IntroAnimation({
                             // A. Calculate Circle Position
                             const circleRadius = Math.min(minDimension * 0.35, 350);
 
-                            const circleAngle = (i / TOTAL_IMAGES) * 360;
+                            const circleAngle = (i / TOTAL_IMAGES) * 360 + autoRotateValue;
                             const circleRad = (circleAngle * Math.PI) / 180;
                             const circlePos = {
                                 x: Math.cos(circleRad) * circleRadius,

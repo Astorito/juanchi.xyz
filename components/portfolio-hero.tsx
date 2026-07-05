@@ -12,17 +12,36 @@ interface PortfolioHeroProps {
 export function PortfolioHero({ ready = false }: PortfolioHeroProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
-  const images: ScrollMorphHeroImage[] = projects.map((project) => ({
-    src: project.image,
-    title: project.title,
-    subtitle: project.role,
-    href: project.link,
+  interface HeroCard {
+    image: ScrollMorphHeroImage
+    project?: Project
+  }
+
+  const projectCards: HeroCard[] = projects.map((project) => ({
+    project,
+    image: {
+      src: project.image,
+      title: project.title,
+      subtitle: project.role,
+      href: project.link,
+    },
   }))
 
+  const tagCard: HeroCard = {
+    image: { src: "/tag-logo.png", title: "TAG", subtitle: "The Anything Group" },
+  }
+
+  const baseCards = [...projectCards, tagCard]
+
+  // Duplicated so the circle is denser — with evenly spaced cards, index i and
+  // i + baseCards.length land exactly 180° apart, so each repeat faces its twin.
+  const cards: HeroCard[] = [...baseCards, ...baseCards]
+  const images: ScrollMorphHeroImage[] = cards.map((card) => card.image)
+
   const handleImageClick = (_image: ScrollMorphHeroImage, index: number) => {
-    const project = projects[index]
-    if (project.details) setSelectedProject(project)
-    else if (project.link) window.open(project.link, "_blank", "noopener,noreferrer")
+    const project = cards[index]?.project
+    if (project?.details) setSelectedProject(project)
+    else if (project?.link) window.open(project.link, "_blank", "noopener,noreferrer")
   }
 
   return (
