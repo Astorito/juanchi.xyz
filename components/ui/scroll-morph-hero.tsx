@@ -144,6 +144,8 @@ export interface IntroAnimationProps {
     heroTitle?: string;
     /** Small caption under the headline during the intro phase. */
     heroSubtitle?: string;
+    /** Optional thin/small tagline rendered between heroTitle and heroSubtitle. */
+    heroTagline?: string;
     /** Headline shown once the arc has formed (post-scroll). */
     contentTitle?: string;
     /** Supporting copy shown once the arc has formed (post-scroll). */
@@ -169,6 +171,7 @@ export default function IntroAnimation({
     images = DEFAULT_IMAGES,
     heroTitle = "The future is built on AI.",
     heroSubtitle = "SCROLL TO EXPLORE",
+    heroTagline,
     contentTitle = "Explore Our Vision",
     contentDescription = (
         <>
@@ -396,10 +399,20 @@ export default function IntroAnimation({
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         animate={circleSettled && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" } : { opacity: 0, filter: "blur(10px)" }}
                         transition={{ duration: 1 }}
-                        className="text-2xl font-medium tracking-tight leading-relaxed text-gray-800 md:text-4xl"
+                        className="text-2xl font-medium tracking-tight leading-loose text-gray-800 md:text-4xl"
                     >
                         {heroTitle}
                     </motion.h1>
+                    {heroTagline && (
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={circleSettled && morphValue < 0.5 ? { opacity: 0.6 - morphValue } : { opacity: 0 }}
+                            transition={{ duration: 1, delay: 0.1 }}
+                            className="mt-1 text-[11px] md:text-xs font-light tracking-[0.15em] text-gray-500"
+                        >
+                            {heroTagline}
+                        </motion.p>
+                    )}
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={circleSettled && morphValue < 0.5 ? { opacity: 0.5 - morphValue } : { opacity: 0 }}

@@ -161,4 +161,20 @@ export const projects: Project[] = [
       ],
     },
   },
+  {
+    title: "TAG",
+    role: "AI Engineer",
+    description: "The Anything Group — the AI engineering studio behind every venture in this portfolio.",
+    image: "/tag-logo.png",
+    link: null,
+    details: {
+      overview:
+        "TAG (The Anything Group) is the AI engineering practice behind my applied ML work — the studio that turns a venture idea into a deployed, production-grade AI system. It's the common thread across every project here: LLM agents, retrieval pipelines, generative media, and computer vision systems built to hold up under real usage, not just a demo.",
+      metrics: [
+        "Shipped production AI systems spanning generative media, RAG, and computer vision use cases.",
+        "Built repeatable fine-tuning and evaluation pipelines so model quality stays measurable, not anecdotal.",
+        "The technical backbone behind every AI venture in this portfolio, from architecture to deployment.",
+      ],
+    },
+  },
 ]

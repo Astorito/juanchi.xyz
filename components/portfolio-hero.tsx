@@ -73,7 +73,7 @@ export function PortfolioHero({ ready = false, onScrollProgress }: PortfolioHero
     project?: Project
   }
 
-  const projectCards: HeroCard[] = projects.map((project) => ({
+  const baseCards: HeroCard[] = projects.map((project) => ({
     project,
     image: {
       src: project.image,
@@ -82,12 +82,6 @@ export function PortfolioHero({ ready = false, onScrollProgress }: PortfolioHero
       href: project.link,
     },
   }))
-
-  const tagCard: HeroCard = {
-    image: { src: "/tag-logo.png", title: "TAG", subtitle: "The Anything Group" },
-  }
-
-  const baseCards = [...projectCards, tagCard]
 
   // Duplicated so the circle is denser — with evenly spaced cards, index i and
   // i + baseCards.length land exactly 180° apart, so each repeat faces its twin.
@@ -105,6 +99,7 @@ export function PortfolioHero({ ready = false, onScrollProgress }: PortfolioHero
       <IntroAnimation
         images={images}
         heroTitle="Juanchi Martinez"
+        heroTagline="AI Engineer"
         heroSubtitle="SCROLL TO EXPLORE"
         backgroundClassName="bg-[#f5f4f1]"
         onImageClick={handleImageClick}
