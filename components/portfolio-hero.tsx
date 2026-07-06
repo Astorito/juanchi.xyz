@@ -90,8 +90,7 @@ export function PortfolioHero({ ready = false, onScrollProgress }: PortfolioHero
 
   const handleImageClick = (_image: ScrollMorphHeroImage, index: number) => {
     const project = cards[index]?.project
-    if (project?.details) setSelectedProject(project)
-    else if (project?.link) window.open(project.link, "_blank", "noopener,noreferrer")
+    if (project) setSelectedProject(project)
   }
 
   return (
