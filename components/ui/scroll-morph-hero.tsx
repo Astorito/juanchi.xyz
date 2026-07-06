@@ -220,6 +220,9 @@ export default function IntroAnimation({
     const scrollRef = useRef(0); // Keep track of scroll value without re-renders
     // Once the virtual scroll hits MAX_SCROLL we stop hijacking the wheel so
     // the page can scroll natively past the hero into the sections below.
+    // We keep tracking the value even after unlocking (just without
+    // preventDefault) so scrolling back up over the hero still un-shuffles
+    // the cards back into view instead of leaving them stuck off-screen.
     const scrollUnlockedRef = useRef(false);
 
     useEffect(() => {
@@ -227,10 +230,10 @@ export default function IntroAnimation({
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
-            if (scrollUnlockedRef.current) return; // let native scroll take over
-
-            // Prevent default to stop browser overscroll/bounce
-            e.preventDefault();
+            if (!scrollUnlockedRef.current) {
+                // Prevent default to stop browser overscroll/bounce
+                e.preventDefault();
+            }
 
             const newScroll = Math.min(Math.max(scrollRef.current + e.deltaY, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
@@ -244,8 +247,6 @@ export default function IntroAnimation({
             touchStartY = e.touches[0].clientY;
         };
         const handleTouchMove = (e: TouchEvent) => {
-            if (scrollUnlockedRef.current) return; // let native scroll take over
-
             const touchY = e.touches[0].clientY;
             const deltaY = touchStartY - touchY;
             touchStartY = touchY;
