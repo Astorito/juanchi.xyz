@@ -3,12 +3,18 @@ export type ProjectDetails = {
   metrics: string[]
 }
 
+export type ProjectLink = {
+  label: string
+  url: string
+}
+
 export type Project = {
   title: string
   role: string
   description: string
   image: string
   link: string | null
+  links?: ProjectLink[]
   comingSoon?: boolean
   details?: ProjectDetails
 }
@@ -167,6 +173,10 @@ export const projects: Project[] = [
     description: "The Anything Group — the AI engineering studio behind every venture in this portfolio.",
     image: "/tag-logo.png",
     link: null,
+    links: [
+      { label: "Visit website", url: "https://albiebytag.com/" },
+      { label: "Brain", url: "https://uew6tnv3a67s.placeground.site/#home" },
+    ],
     details: {
       overview:
         "TAG (The Anything Group) is the AI engineering practice behind my applied ML work — the studio that turns a venture idea into a deployed, production-grade AI system. It's the common thread across every project here: LLM agents, retrieval pipelines, generative media, and computer vision systems built to hold up under real usage, not just a demo.",

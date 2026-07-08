@@ -428,7 +428,7 @@ export default function IntroAnimation({
                 {overlayContent ? (
                     <motion.div
                         style={{ opacity: contentOpacity, y: contentY }}
-                        className="absolute top-[8%] z-10 flex flex-col items-center justify-center text-center px-4 w-full"
+                        className="absolute top-[8%] z-10 flex flex-col items-center justify-center text-center px-4 w-full pointer-events-none"
                     >
                         {overlayContent({ morphValue, arcProgress })}
                     </motion.div>

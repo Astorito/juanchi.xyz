@@ -42,7 +42,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="pointer-events-auto w-[95vw] h-[92vh] max-w-6xl bg-zinc-950/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="pointer-events-auto w-[95vw] max-h-[85vh] max-w-6xl bg-zinc-950/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
 
               {/* Image header */}
               <div className="relative h-28 md:h-36 shrink-0 overflow-hidden">
@@ -73,7 +73,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               </div>
 
               {/* Content — two columns */}
-              <div className="px-6 md:px-8 pt-6 pb-8 overflow-y-auto flex-1">
+              <div className="px-6 md:px-8 pt-6 pb-8 overflow-y-auto min-h-0">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-4xl mx-auto">
                   {/* Left: Overview */}
                   <div className="flex flex-col gap-3">
@@ -83,15 +83,20 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                     <p className="text-sm md:text-base text-white/75 leading-relaxed">
                       {project.details?.overview ?? project.description}
                     </p>
-                    {project.link && (
-                      <a
-                        href={project.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition-colors mt-auto pt-2"
-                      >
-                        Visit site <ArrowUpRight className="w-3.5 h-3.5" />
-                      </a>
+                    {(project.links ?? (project.link ? [{ label: "Visit site", url: project.link }] : [])).length > 0 && (
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
+                        {(project.links ?? (project.link ? [{ label: "Visit site", url: project.link }] : [])).map((l) => (
+                          <a
+                            key={l.url}
+                            href={l.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition-colors"
+                          >
+                            {l.label} <ArrowUpRight className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                      </div>
                     )}
                   </div>
 
