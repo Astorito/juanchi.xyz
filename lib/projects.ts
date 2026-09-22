@@ -54,13 +54,13 @@ export const projects: Project[] = [
   },
   {
     title: "SoyGalo",
-    role: "COO",
+    role: "Executive Operations Leader",
     description: "AI-driven lending and onboarding platform. Currently leading operations and all AI initiatives.",
     image: "/soygalo-logo.svg",
     link: "https://www.soygalo.com/",
     details: {
       overview:
-        "Serving as Chief Operating Officer at SoyGalo, leading day-to-day operations and directing every artificial intelligence initiative across the company — from internal process automation to AI-driven features embedded in the product itself.",
+        "Serving as Executive Operations Leader at SoyGalo, leading day-to-day operations and directing every artificial intelligence initiative across the company — from internal process automation to AI-driven features embedded in the product itself.",
       metrics: [
         "Overseeing operations end-to-end for the SoyGalo platform.",
         "Directing all AI initiatives across the company, from internal tooling to product-facing features.",
