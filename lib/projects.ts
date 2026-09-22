@@ -56,7 +56,7 @@ export const projects: Project[] = [
     title: "SoyGalo",
     role: "COO",
     description: "AI-driven lending and onboarding platform. Currently leading operations and all AI initiatives.",
-    image: "/soygalo-placeholder.jpg",
+    image: "/soygalo-logo.svg",
     link: "https://www.soygalo.com/",
     details: {
       overview:
